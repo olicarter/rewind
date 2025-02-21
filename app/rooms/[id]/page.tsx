@@ -127,7 +127,6 @@ function isDefinedAndHasPeerId<
 
 function SentimentInputs(props: { sentiment: SentimentResult | null }) {
   const [value, setValue] = useState<Sentiment | null>(null)
-  console.log(props.sentiment)
 
   return (
     <div className={styles.sentimentInputs}>
