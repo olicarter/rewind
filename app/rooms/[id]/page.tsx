@@ -1,7 +1,7 @@
 'use client'
 
 import { db } from '@/app/db'
-import { FormEvent, useEffect, useState, useCallback, useRef } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import styles from './page.module.css'
 import { id } from '@instantdb/react'
 import { Button } from '@/components/Button'
@@ -32,13 +32,9 @@ export default function Room() {
 
   const sentiment = useSentiment()
 
-  const debouncedClassify = useCallback(
-    debounce((text: string) => {
-      console.log('foo')
-      sentiment.classify(text)
-    }, 200),
-    [sentiment]
-  )
+  const debouncedClassify = debounce((text: string) => {
+    sentiment.classify(text)
+  }, 200)
 
   useEffect(() => {
     // Cleanup debounced function on unmount
@@ -49,7 +45,7 @@ export default function Room() {
     if (profile) {
       presence.publishPresence({ name: profile.nickname })
     }
-  }, [presence.publishPresence, profile?.nickname])
+  }, [presence, profile])
 
   if (!profile) {
     return null
