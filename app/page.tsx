@@ -17,12 +17,19 @@ export default function Home() {
   }
 
   if (!auth.user) {
-    return <SignInForm />
+    return (
+      <main className={styles.main}>
+        <SignInForm />
+      </main>
+    )
   }
 
   return (
     <main className={styles.main}>
       <JoinRoomForm user={auth.user} />
+      <Button type="button" onClick={() => db.auth.signOut()}>
+        Sign out
+      </Button>
     </main>
   )
 }
@@ -33,7 +40,11 @@ function SignInForm() {
     redirectURL: window.location.href,
   })
 
-  return <a href={url}>Continue with Google</a>
+  return (
+    <Button asChild>
+      <a href={url}>Continue with Google</a>
+    </Button>
+  )
 }
 
 function JoinRoomForm(props: { user: User }) {
