@@ -61,7 +61,11 @@ export default function Room() {
     const content = formData.get('content') as string
     const postId = id()
     db.transact([
-      db.tx.posts[postId].update({ content, roomId }),
+      db.tx.posts[postId].update({
+        content,
+        roomId,
+        sentiment: sentiment.result?.label,
+      }),
       db.tx.posts[postId].link({ author: profile?.id }),
     ])
     event.currentTarget.reset()
