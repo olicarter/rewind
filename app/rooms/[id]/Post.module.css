@@ -1,0 +1,32 @@
+.post {
+  background-color: hsla(0, 0%, 100%, 0.1);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.post header {
+  padding: 0.5rem;
+}
+
+.author {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.post textarea {
+  background-color: transparent;
+  padding: 0.5rem;
+}
+
+.post textarea:read-only {
+  cursor: default;
+}
+
+.post footer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.5rem 0.5rem;
+}

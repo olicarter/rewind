@@ -1,0 +1,14 @@
+.form {
+  display: grid;
+  gap: 0.5rem;
+  grid-auto-rows: min-content;
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.label {
+  font-weight: 600;
+}

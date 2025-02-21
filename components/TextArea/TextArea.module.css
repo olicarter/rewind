@@ -1,0 +1,13 @@
+.textArea {
+  background-color: hsla(0, 0%, 100%, 0.1);
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  line-height: 1.5;
+  padding: 0.5rem;
+  resize: none;
+}
+
+.textArea:focus-visible {
+  outline: none;
+}

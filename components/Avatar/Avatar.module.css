@@ -1,0 +1,18 @@
+.root {
+  align-items: center;
+  background-color: white;
+  border-radius: 1.25rem;
+  color: black;
+  display: flex;
+  font-weight: 700;
+  height: 2.5rem;
+  justify-content: center;
+  text-transform: uppercase;
+  width: 2.5rem;
+}
+
+.image {
+  border-radius: 1.25rem;
+  height: 2.5rem;
+  width: 2.5rem;
+}
