@@ -6,10 +6,6 @@ export enum Sentiment {
   NEGATIVE = 'NEGATIVE',
 }
 
-export function isSentiment(value: string): value is Sentiment {
-  return Object.values(Sentiment).includes(value as Sentiment)
-}
-
 export interface SentimentResult {
   label: Sentiment
   score: number

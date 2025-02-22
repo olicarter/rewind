@@ -6,16 +6,26 @@ import styles from './CreatePostForm.module.css'
 import { id, InstaQLEntity } from '@instantdb/react'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
-import {
-  isSentiment,
-  Sentiment,
-  useSentimentAnalyser,
-} from '@/hooks/useSentimentAnalyser'
+import { Sentiment, useSentimentAnalyser } from '@/hooks/useSentimentAnalyser'
 import { debounce } from 'lodash'
 import { SentimentInput, SentimentInputs } from './SentimentInputs'
 import schema from '@/instant.schema'
+import z from 'zod'
 
 export type Post = InstaQLEntity<typeof schema, 'posts', { author: {} }>
+
+const postSchema = z.object({
+  content: z.string().trim().min(1, { message: 'Required' }),
+  postId: z.string().uuid(),
+  profileId: z.string().uuid(),
+  roomId: z.string().length(4),
+  sentiment: z.nativeEnum(Sentiment),
+})
+
+function parseFormData(event: FormEvent<HTMLFormElement>) {
+  const formData = new FormData(event.currentTarget)
+  return postSchema.safeParse(Object.fromEntries(formData.entries()))
+}
 
 export function CreatePostForm(props: {
   post?: Post
@@ -40,53 +50,28 @@ export function CreatePostForm(props: {
   }, [debouncedClassify])
 
   useEffect(() => {
-    if (!selectedSentiment || !sentiment.result || !!content.trim().length) {
+    if (!selectedSentiment || !sentiment.result || content.trim().length > 0) {
       debouncedClassify(content)
     }
   }, [content, debouncedClassify, selectedSentiment, sentiment.result])
 
   async function createPost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const content = formData.get('content') as string
-    const postId = formData.get('postId') as string
-    const profileId = formData.get('profileId') as string
-    const roomId = formData.get('roomId') as string
-    const sentiment = formData.get('sentiment') as string
-    if (!isSentiment(sentiment)) {
-      throw new Error('Invalid sentiment')
-    }
+    const { data, error } = parseFormData(event)
+    // TODO: Handle errors
+    if (error) return
     event.currentTarget.reset()
     setContent('')
     setSelectedSentiment(null)
     await db.transact([
-      db.tx.posts[postId].update({
-        content,
-        roomId,
-        sentiment,
+      db.tx.posts[data.postId].update({
+        content: data.content,
+        roomId: data.roomId,
+        sentiment: data.sentiment,
       }),
-      db.tx.posts[postId].link({ author: profileId }),
-    ])
-  }
-
-  async function updatePost(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const content = formData.get('content') as string
-    const postId = formData.get('postId') as string
-    const profileId = formData.get('profileId') as string
-    const roomId = formData.get('roomId') as string
-    const sentiment = formData.get('sentiment') as string
-    if (!isSentiment(sentiment)) {
-      throw new Error('Invalid sentiment')
-    }
-    await db.transact([
-      db.tx.posts[postId].update({
-        content,
-        roomId,
-        sentiment,
+      db.tx.posts[data.postId].link({
+        author: data.profileId,
       }),
-      db.tx.posts[postId].link({ author: profileId }),
     ])
   }
 
@@ -156,4 +141,21 @@ export function CreatePostForm(props: {
 
 function deletePost(postId: string) {
   db.transact(db.tx.posts[postId].delete())
+}
+
+async function updatePost(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault()
+  const { data, error } = parseFormData(event)
+  // TODO: Handle errors
+  if (error) return
+  await db.transact([
+    db.tx.posts[data.postId].update({
+      content: data.content,
+      roomId: data.roomId,
+      sentiment: data.sentiment,
+    }),
+    db.tx.posts[data.postId].link({
+      author: data.profileId,
+    }),
+  ])
 }
