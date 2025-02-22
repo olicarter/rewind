@@ -62,7 +62,7 @@ function JoinRoomForm(props: { user: User }) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const nickname = formData.get('nickname') as string
-    const roomCode = formData.get('code') as string
+    const roomCode = (formData.get('code') as string).toUpperCase()
     const profileId = query.data?.profiles.at(0)?.id ?? id()
     db.transact([
       db.tx.profiles[profileId].update({ nickname }),
