@@ -1,7 +1,6 @@
 .presentUsers {
   display: flex;
   gap: 0.5rem;
-  grid-column: 1 / -1;
 }
 
 .label {

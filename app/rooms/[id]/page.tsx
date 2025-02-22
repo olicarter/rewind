@@ -1,11 +1,14 @@
 'use client'
 
 import { db } from '@/app/db'
-import { useEffect } from 'react'
 import styles from './page.module.css'
-import { redirect, useParams, useSearchParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 import { CreatePostForm } from './CreatePostForm'
-import { PresentUsers } from './PresentUsers'
+import {
+  getHostsSelectedProfileIds,
+  parseSelectedProfileIds,
+  PresentUsers,
+} from './PresentUsers'
 
 export default function Room() {
   const { id: roomId } = useParams<{ id: string }>()
@@ -14,15 +17,26 @@ export default function Room() {
     redirect(`/rooms/${roomId.toUpperCase()}`)
   }
 
-  const searchParams = useSearchParams()
+  const room = db.room('retro', roomId)
   const auth = db.useAuth()
-  const selectedProfiles = searchParams.getAll('selected-profiles')
-  const query = db.useQuery({
+  const presence = db.rooms.usePresence(room)
+  const userSelectedProfileIds = parseSelectedProfileIds(
+    presence.user?.selectedProfileIds
+  )
+  const hostsSelectedProfileIds = getHostsSelectedProfileIds(presence)
+  const selectedProfileIds =
+    hostsSelectedProfileIds.length > 0
+      ? hostsSelectedProfileIds
+      : userSelectedProfileIds.length > 0
+      ? userSelectedProfileIds
+      : []
+
+  const { data } = db.useQuery({
     posts: {
       $: {
         where: {
-          ...(selectedProfiles.length
-            ? { 'author.id': { $in: selectedProfiles } }
+          ...(selectedProfileIds.length
+            ? { 'author.id': { $in: selectedProfileIds } }
             : {}),
           roomId,
         },
@@ -32,18 +46,13 @@ export default function Room() {
     profiles: { $: { where: { $user: auth.user?.id ?? '' } } },
   })
 
-  const profile = query.data?.profiles.at(0)
-  const room = db.room('retro', roomId)
-  const presence = db.rooms.usePresence(room)
+  const profile = data?.profiles.at(0)
 
-  useEffect(() => {
-    if (profile) {
-      presence.publishPresence({
-        name: profile.nickname,
-        profileId: profile.id,
-      })
-    }
-  }, [presence, profile])
+  db.rooms.useSyncPresence(room, {
+    name: profile?.nickname,
+    profileId: profile?.id,
+    isHost: Object.values(presence.peers).every(peer => !peer.isHost),
+  })
 
   if (auth.user === null) {
     redirect('/')
@@ -55,10 +64,13 @@ export default function Room() {
 
   return (
     <main className={styles.main}>
-      <PresentUsers roomId={roomId} />
+      <header>
+        <PresentUsers roomId={roomId} />
+        {presence.user?.isHost ? <span>Host</span> : null}
+      </header>
       <CreatePostForm roomId={roomId} profileId={profile.id} />
       <ul className={styles.posts}>
-        {query.data?.posts.map(post => (
+        {data?.posts.map(post => (
           <CreatePostForm
             key={post.id}
             post={post}

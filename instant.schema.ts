@@ -52,8 +52,11 @@ const _schema = i.schema({
   rooms: {
     retro: {
       presence: i.entity({
+        isHost: i.boolean(),
         name: i.string(),
         profileId: i.string(),
+        // JSON serialized array of profile IDs
+        selectedProfileIds: i.string(),
       }),
     },
   },

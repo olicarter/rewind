@@ -2,49 +2,38 @@
 
 import { db } from '@/app/db'
 import styles from './PresentUsers.module.css'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 export function PresentUsers(props: { roomId: string }) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
   const room = db.room('retro', props.roomId)
   const presence = db.rooms.usePresence(room)
 
-  const presentUsers = [presence.user, ...Object.values(presence.peers)].filter(
-    isDefinedAndHasPeerId
-  )
-
-  const [selectedProfiles, setSelectedProfiles] = useState<string[]>(
-    searchParams.getAll('selected-profiles')
-  )
+  const presentUsers = getPresentUsers(presence)
+  const hostsSelectedProfileIds = getHostsSelectedProfileIds(presence)
 
   return (
     <ul className={styles.presentUsers}>
       {presentUsers.map(presentUser => (
         <label className={styles.label} key={presentUser.peerId}>
           <input
-            checked={selectedProfiles.includes(presentUser.profileId)}
+            checked={hostsSelectedProfileIds.includes(presentUser.profileId)}
             onChange={event => {
-              const newSelectedProfiles = event.currentTarget.checked
-                ? [...selectedProfiles, presentUser.profileId]
-                : selectedProfiles.filter(
-                    user => user !== presentUser.profileId
-                  )
-
-              setSelectedProfiles(newSelectedProfiles)
-              const newSearchParams = new URLSearchParams(searchParams)
-              if (newSelectedProfiles.length === 0) {
-                newSearchParams.delete('selected-profiles')
-              } else {
-                newSelectedProfiles.forEach(user =>
-                  newSearchParams.append('selected-profiles', user)
-                )
+              if (!presence.user?.isHost) {
+                return
               }
-              router.replace(
-                `/rooms/${props.roomId}?${newSearchParams.toString()}`
-              )
+
+              const newSelectedProfileIds = new Set(hostsSelectedProfileIds)
+
+              if (event.currentTarget.checked) {
+                newSelectedProfileIds.add(presentUser.profileId)
+              } else {
+                newSelectedProfileIds.delete(presentUser.profileId)
+              }
+
+              presence.publishPresence({
+                selectedProfileIds: JSON.stringify(
+                  Array.from(newSelectedProfileIds)
+                ),
+              })
             }}
             type="checkbox"
           />
@@ -52,6 +41,50 @@ export function PresentUsers(props: { roomId: string }) {
         </label>
       ))}
     </ul>
+  )
+}
+
+export function parseSelectedProfileIds(
+  selectedProfileIds: string | undefined
+): string[] {
+  return JSON.parse(selectedProfileIds ?? '[]')
+}
+
+export function getHostsSelectedProfileIds<
+  PresenceUser extends {
+    isHost: boolean
+    name: string
+    peerId: string | undefined
+    profileId: string
+    selectedProfileIds: string
+  },
+  Presence extends {
+    user?: PresenceUser
+    peers: Record<string, PresenceUser>
+  }
+>(presence: Presence): string[] {
+  const presentUsers = getPresentUsers(presence)
+
+  return presentUsers.flatMap(presentUser =>
+    presentUser.isHost ? JSON.parse(presentUser.selectedProfileIds ?? '[]') : []
+  )
+}
+
+export function getPresentUsers<
+  PresenceUser extends {
+    isHost: boolean
+    name: string
+    peerId: string | undefined
+    profileId: string
+    selectedProfileIds: string
+  },
+  Presence extends {
+    user?: PresenceUser
+    peers: Record<string, PresenceUser>
+  }
+>(presence: Presence) {
+  return [presence.user, ...Object.values(presence.peers)].filter(
+    isDefinedAndHasPeerId
   )
 }
 
