@@ -55,12 +55,13 @@ export default function Room() {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const content = formData.get('content') as string
+    const sentiment = formData.get('sentiment') as Sentiment
     const postId = id()
     db.transact([
       db.tx.posts[postId].update({
         content,
         roomId,
-        sentiment: sentiment.result?.label,
+        sentiment,
       }),
       db.tx.posts[postId].link({ author: profile?.id }),
     ])
@@ -70,33 +71,30 @@ export default function Room() {
   return (
     <main className={styles.main}>
       <PresentUsers roomId={roomId} />
-      <div className={styles.columns}>
-        <section>
-          <h3>What went well</h3>
-          <form
-            className={styles.form}
-            onKeyDown={event => {
-              if (event.metaKey && event.key === 'Enter') {
-                event.currentTarget.requestSubmit()
-              }
-            }}
-            onSubmit={createPost}
-          >
-            <TextArea
-              name="content"
-              onChange={event => debouncedClassify(event.target.value)}
-              required
-            />
-            <SentimentInputs sentiment={sentiment.result} />
-            <Button type="button">Create post</Button>
-          </form>
-          <ul className={styles.postList}>
-            {query.data?.posts.map(post => (
-              <Post key={post.id} post={post} profile={profile} />
-            ))}
-          </ul>
-        </section>
-      </div>
+      <section>
+        <form
+          className={styles.form}
+          onKeyDown={event => {
+            if (event.metaKey && event.key === 'Enter') {
+              event.currentTarget.requestSubmit()
+            }
+          }}
+          onSubmit={createPost}
+        >
+          <TextArea
+            name="content"
+            onChange={event => debouncedClassify(event.target.value)}
+            required
+          />
+          <SentimentInputs sentiment={sentiment.result} />
+          <Button>Create post</Button>
+        </form>
+      </section>
+      <ul className={styles.postList}>
+        {query.data?.posts.map(post => (
+          <Post key={post.id} post={post} profile={profile} />
+        ))}
+      </ul>
     </main>
   )
 }
@@ -132,20 +130,22 @@ function SentimentInputs(props: { sentiment: SentimentResult | null }) {
     <div className={styles.sentimentInputs}>
       <input
         checked={(value ?? props.sentiment?.label) === Sentiment.POSITIVE}
-        type="radio"
+        id={Sentiment.POSITIVE}
         name="sentiment"
-        value={Sentiment.POSITIVE}
         onChange={event => setValue(event.target.value as Sentiment.POSITIVE)}
+        type="radio"
+        value={Sentiment.POSITIVE}
       />
-      <label className={styles.positive}>Positive</label>
+      <label htmlFor={Sentiment.POSITIVE}>Positive</label>
       <input
         checked={(value ?? props.sentiment?.label) === Sentiment.NEGATIVE}
-        type="radio"
+        id={Sentiment.NEGATIVE}
         name="sentiment"
-        value={Sentiment.NEGATIVE}
         onChange={event => setValue(event.target.value as Sentiment.NEGATIVE)}
+        type="radio"
+        value={Sentiment.NEGATIVE}
       />
-      <label className={styles.negative}>Negative</label>
+      <label htmlFor={Sentiment.NEGATIVE}>Negative</label>
     </div>
   )
 }

@@ -27,9 +27,9 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <JoinRoomForm user={auth.user} />
-      <Button type="button" onClick={() => db.auth.signOut()}>
+      {/* <Button type="button" onClick={() => db.auth.signOut()}>
         Sign out
-      </Button>
+      </Button> */}
     </main>
   )
 }
