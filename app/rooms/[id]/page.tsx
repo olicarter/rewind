@@ -9,6 +9,11 @@ import { PresentUsers } from './PresentUsers'
 
 export default function Room() {
   const { id: roomId } = useParams<{ id: string }>()
+
+  if (!isEveryCharUppercase(roomId)) {
+    redirect(`/rooms/${roomId.toUpperCase()}`)
+  }
+
   const searchParams = useSearchParams()
   const auth = db.useAuth()
   const selectedProfiles = searchParams.getAll('selected-profiles')
@@ -64,4 +69,8 @@ export default function Room() {
       </ul>
     </main>
   )
+}
+
+function isEveryCharUppercase(value: string) {
+  return value.split('').every(char => char.toUpperCase() === char)
 }
