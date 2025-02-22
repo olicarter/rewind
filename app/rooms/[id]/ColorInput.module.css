@@ -1,0 +1,28 @@
+.colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: inherit;
+}
+
+.colors input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+}
+
+.colors input[type='radio'] + label {
+  aspect-ratio: 1;
+  background: hsl(var(--hue), 100%, 40%);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  display: block;
+  height: 1.5rem;
+}
+
+.colors input[type='radio']:checked + label {
+  outline: 2px solid white;
+}
+
+.colors input[type='radio']:focus-visible + label {
+  outline: 2px solid white;
+  /* animation: pulse 1s linear infinite; */
+}

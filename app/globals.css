@@ -1,6 +1,7 @@
 :root {
-  --color-background-1: #000;
-  --color-background-2: hsla(0, 0%, 100%, 0.15);
+  --color-background: #000;
+  --color-layer: hsla(0, 0%, 100%, 0.15);
+  --color-foreground: hsla(0, 0%, 100%, 0.85);
 }
 
 html,
@@ -10,8 +11,8 @@ body {
 }
 
 body {
-  background-color: black;
-  color: #eee;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -1,5 +1,5 @@
 .post {
-  background-color: var(--color-background-2);
+  background-color: var(--color-layer);
   border-radius: 0.5rem;
   display: flex;
   flex-direction: column;

@@ -58,9 +58,12 @@ export function Post(props: { post: Post; profile: Profile }) {
         readOnly={!isAuthor}
         value={value}
       />
-      {isAuthor && isDirty && (
+      {isAuthor && (
         <footer>
-          <Button>{value.trim() === '' ? 'Delete' : 'Save'}</Button>
+          <Button disabled={!isDirty}>Save</Button>
+          <Button onClick={deletePost} type="button">
+            Delete
+          </Button>
         </footer>
       )}
     </form>

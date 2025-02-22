@@ -1,19 +1,12 @@
 'use client'
 
 import { db } from '@/app/db'
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import styles from './page.module.css'
-import { id } from '@instantdb/react'
 import { Button } from '@/components/Button'
 import { Post } from './Post'
-import { TextArea } from '@/components/TextArea'
 import { useParams } from 'next/navigation'
-import {
-  Sentiment,
-  SentimentResult,
-  useSentiment,
-} from '@/hooks/useSentiment/useSentiment'
-import { debounce } from 'lodash'
+import { CreatePostForm } from './CreatePostForm'
 
 export default function Room() {
   const { id: roomId } = useParams<{ id: string }>()
@@ -30,17 +23,6 @@ export default function Room() {
   const room = db.room('retro', roomId)
   const presence = db.rooms.usePresence(room)
 
-  const sentiment = useSentiment()
-
-  const debouncedClassify = debounce((text: string) => {
-    sentiment.classify(text)
-  }, 200)
-
-  useEffect(() => {
-    // Cleanup debounced function on unmount
-    return () => debouncedClassify.cancel()
-  }, [debouncedClassify])
-
   useEffect(() => {
     if (profile) {
       presence.publishPresence({ name: profile.nickname })
@@ -51,45 +33,10 @@ export default function Room() {
     return null
   }
 
-  function createPost(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const content = formData.get('content') as string
-    const sentiment = formData.get('sentiment') as Sentiment
-    const postId = id()
-    db.transact([
-      db.tx.posts[postId].update({
-        content,
-        roomId,
-        sentiment,
-      }),
-      db.tx.posts[postId].link({ author: profile?.id }),
-    ])
-    event.currentTarget.reset()
-  }
-
   return (
     <main className={styles.main}>
       <PresentUsers roomId={roomId} />
-      <section>
-        <form
-          className={styles.form}
-          onKeyDown={event => {
-            if (event.metaKey && event.key === 'Enter') {
-              event.currentTarget.requestSubmit()
-            }
-          }}
-          onSubmit={createPost}
-        >
-          <TextArea
-            name="content"
-            onChange={event => debouncedClassify(event.target.value)}
-            required
-          />
-          <SentimentInputs sentiment={sentiment.result} />
-          <Button>Create post</Button>
-        </form>
-      </section>
+      <CreatePostForm roomId={roomId} profileId={profile.id} />
       <ul className={styles.postList}>
         {query.data?.posts.map(post => (
           <Post key={post.id} post={post} profile={profile} />
@@ -111,7 +58,9 @@ function PresentUsers(props: { roomId: string }) {
   return (
     <div className={styles.presenceList}>
       {presentUsers.map(presence => (
-        <Button key={presence.peerId}>{presence.name}</Button>
+        <Button asChild key={presence.peerId}>
+          <p>{presence.name}</p>
+        </Button>
       ))}
     </div>
   )
@@ -121,31 +70,4 @@ function isDefinedAndHasPeerId<
   T extends { peerId: string | undefined } | undefined
 >(presence: T): presence is T & { peerId: string } {
   return !!presence && !!presence.peerId
-}
-
-function SentimentInputs(props: { sentiment: SentimentResult | null }) {
-  const [value, setValue] = useState<Sentiment | null>(null)
-
-  return (
-    <div className={styles.sentimentInputs}>
-      <input
-        checked={(value ?? props.sentiment?.label) === Sentiment.POSITIVE}
-        id={Sentiment.POSITIVE}
-        name="sentiment"
-        onChange={event => setValue(event.target.value as Sentiment.POSITIVE)}
-        type="radio"
-        value={Sentiment.POSITIVE}
-      />
-      <label htmlFor={Sentiment.POSITIVE}>Positive</label>
-      <input
-        checked={(value ?? props.sentiment?.label) === Sentiment.NEGATIVE}
-        id={Sentiment.NEGATIVE}
-        name="sentiment"
-        onChange={event => setValue(event.target.value as Sentiment.NEGATIVE)}
-        type="radio"
-        value={Sentiment.NEGATIVE}
-      />
-      <label htmlFor={Sentiment.NEGATIVE}>Negative</label>
-    </div>
-  )
 }

@@ -1,0 +1,15 @@
+.form {
+  background-color: var(--color-layer);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.75rem;
+  grid-auto-rows: max-content;
+  height: fit-content;
+  padding: 0.75rem;
+}
+
+.form footer {
+  display: flex;
+  gap: inherit;
+  justify-content: space-between;
+}

@@ -1,5 +1,5 @@
 .textArea {
-  background-color: var(--color-background-2);
+  background-color: var(--color-layer);
   border: none;
   border-radius: 0.5rem;
   color: white;
@@ -10,5 +10,5 @@
 }
 
 .textArea:focus-visible {
-  outline: none;
+  outline: 2px solid var(--color-foreground);
 }
