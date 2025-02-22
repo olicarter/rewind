@@ -53,6 +53,7 @@ const _schema = i.schema({
     retro: {
       presence: i.entity({
         name: i.string(),
+        profileId: i.string(),
       }),
     },
   },

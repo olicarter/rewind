@@ -6,8 +6,9 @@
 }
 
 .input[type='radio'] {
-  position: absolute;
   opacity: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 .input[type='radio']:not([readonly]) + label {
