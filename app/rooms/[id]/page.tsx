@@ -4,7 +4,6 @@ import { db } from '@/app/db'
 import { useEffect } from 'react'
 import styles from './page.module.css'
 import { Button } from '@/components/Button'
-import { Post } from './Post'
 import { useParams } from 'next/navigation'
 import { CreatePostForm } from './CreatePostForm'
 

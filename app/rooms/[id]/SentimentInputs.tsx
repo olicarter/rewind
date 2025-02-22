@@ -33,11 +33,17 @@ interface SentimentInputProps {
   id: string
   label: Sentiment
   onChange: (value: Sentiment) => void
-  tabIndex?: number
+  readOnly?: boolean
   value: Sentiment | null
 }
 
 export function SentimentInput(props: SentimentInputProps) {
+  const text: Record<Sentiment, string> = {
+    [Sentiment.POSITIVE]: 'Good',
+    [Sentiment.NEGATIVE]: 'Bad',
+    [Sentiment.NEUTRAL]: 'Mixed',
+  }
+
   return (
     <>
       <input
@@ -48,8 +54,9 @@ export function SentimentInput(props: SentimentInputProps) {
         onChange={event => {
           props.onChange(event.target.value as Sentiment)
         }}
+        readOnly={props.readOnly}
         required
-        tabIndex={props.tabIndex}
+        tabIndex={props.readOnly ? -1 : 0}
         type="radio"
         value={props.label}
       />
@@ -57,7 +64,7 @@ export function SentimentInput(props: SentimentInputProps) {
         className={cn(styles.label, styles[props.label.toLowerCase()])}
         htmlFor={props.id}
       >
-        {props.label.toLowerCase()}
+        {text[props.label]}
       </label>
     </>
   )

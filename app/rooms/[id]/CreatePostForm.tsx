@@ -76,7 +76,7 @@ export function CreatePostForm(props: {
             label={props.post.sentiment as Sentiment}
             value={props.post.sentiment as Sentiment}
             onChange={setSelectedSentiment}
-            tabIndex={-1}
+            readOnly
           />
         ) : (
           <SentimentInputs

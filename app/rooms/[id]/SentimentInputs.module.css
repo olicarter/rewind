@@ -10,10 +10,13 @@
   opacity: 0;
 }
 
+.input[type='radio']:not([readonly]) + label {
+  cursor: pointer;
+}
+
 .label {
   align-items: center;
   border-radius: 0.375rem;
-  cursor: pointer;
   display: flex;
   font-size: 0.875rem;
   font-weight: 600;
