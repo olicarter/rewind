@@ -22,17 +22,21 @@
   width: fit-content;
 }
 
-.label input {
+.input {
   opacity: 0;
   pointer-events: none;
   position: absolute;
 }
 
-.label:has(input:checked) {
+.input[readonly] + .label {
+  cursor: default;
+}
+
+.input:checked + .label {
   background-color: var(--color-foreground);
   color: var(--color-background);
 }
 
-.label:has(input:focus-visible) {
+.input:focus-visible + .label {
   outline: 2px solid var(--color-foreground);
 }

@@ -27,7 +27,7 @@ export function CreatePostForm(props: {
   )
   const [content, setContent] = useState(props.post?.content ?? '')
   const isAuthor = props.post?.author?.id === props.profileId
-  const isDirty = content !== props.post?.content && isAuthor
+  const isDirty = content.trim() !== props.post?.content && isAuthor
   const sentiment = useSentimentAnalyser()
 
   const debouncedClassify = debounce((text: string) => {
@@ -40,7 +40,7 @@ export function CreatePostForm(props: {
   }, [debouncedClassify])
 
   useEffect(() => {
-    if (!selectedSentiment || (sentiment.result && content.trim().length)) {
+    if (!selectedSentiment || !sentiment.result || !!content.trim().length) {
       debouncedClassify(content)
     }
   }, [content, debouncedClassify, selectedSentiment, sentiment.result])

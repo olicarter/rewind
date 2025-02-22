@@ -21,12 +21,8 @@ export function useSentimentAnalyser() {
   const workerRef = useRef<Worker | null>(null)
 
   useEffect(() => {
-    const worker = workerRef.current
-
-    if (!worker) return
-
     async function initWorker() {
-      if (!worker && typeof window !== 'undefined') {
+      if (!workerRef.current && typeof window !== 'undefined') {
         workerRef.current = new Worker(new URL('./worker.js', import.meta.url))
       }
     }
@@ -60,10 +56,11 @@ export function useSentimentAnalyser() {
     }
 
     // Attach the callback function as an event listener.
-    worker.addEventListener('message', onMessageReceived)
+    workerRef.current?.addEventListener('message', onMessageReceived)
 
     // Define a cleanup function for when the component is unmounted.
-    return () => worker.removeEventListener('message', onMessageReceived)
+    return () =>
+      workerRef.current?.removeEventListener('message', onMessageReceived)
   })
 
   const classify = useCallback((text: string) => {

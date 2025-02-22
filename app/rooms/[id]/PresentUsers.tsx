@@ -2,6 +2,7 @@
 
 import { db } from '@/app/db'
 import styles from './PresentUsers.module.css'
+import { Fragment } from 'react'
 
 export function PresentUsers(props: { roomId: string }) {
   const room = db.room('retro', props.roomId)
@@ -9,17 +10,18 @@ export function PresentUsers(props: { roomId: string }) {
 
   const presentUsers = getPresentUsers(presence)
   const hostsSelectedProfileIds = getHostsSelectedProfileIds(presence)
+  const isHost = !!presence.user?.isHost
 
   return (
     <ul className={styles.presentUsers}>
       {presentUsers.map(presentUser => (
-        <label className={styles.label} key={presentUser.peerId}>
+        <Fragment key={presentUser.peerId}>
           <input
             checked={hostsSelectedProfileIds.includes(presentUser.profileId)}
+            className={styles.input}
+            id={presentUser.peerId}
             onChange={event => {
-              if (!presence.user?.isHost) {
-                return
-              }
+              if (!isHost) return
 
               const newSelectedProfileIds = new Set(hostsSelectedProfileIds)
 
@@ -35,10 +37,13 @@ export function PresentUsers(props: { roomId: string }) {
                 ),
               })
             }}
+            readOnly={!isHost}
             type="checkbox"
           />
-          {presentUser.name}
-        </label>
+          <label className={styles.label} htmlFor={presentUser.peerId}>
+            {presentUser.name}
+          </label>
+        </Fragment>
       ))}
     </ul>
   )
