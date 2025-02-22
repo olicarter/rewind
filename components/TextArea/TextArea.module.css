@@ -12,3 +12,7 @@
 .textArea:focus-visible {
   outline: none;
 }
+
+.textArea:read-only {
+  cursor: default;
+}

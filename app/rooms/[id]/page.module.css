@@ -6,3 +6,9 @@
   min-height: 100vh;
   padding: 1rem;
 }
+
+.posts {
+  display: grid;
+  gap: inherit;
+  grid-auto-rows: max-content;
+}

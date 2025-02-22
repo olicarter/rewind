@@ -3,16 +3,25 @@
 import { db } from '@/app/db'
 import { useEffect } from 'react'
 import styles from './page.module.css'
-import { useParams } from 'next/navigation'
+import { redirect, useParams, useSearchParams } from 'next/navigation'
 import { CreatePostForm } from './CreatePostForm'
 import { PresentUsers } from './PresentUsers'
 
 export default function Room() {
   const { id: roomId } = useParams<{ id: string }>()
+  const searchParams = useSearchParams()
   const auth = db.useAuth()
+  const selectedProfiles = searchParams.getAll('selected-profiles')
   const query = db.useQuery({
     posts: {
-      $: { where: { roomId } },
+      $: {
+        where: {
+          ...(selectedProfiles.length
+            ? { 'author.id': { $in: selectedProfiles } }
+            : {}),
+          roomId,
+        },
+      },
       author: {},
     },
     profiles: { $: { where: { $user: auth.user?.id ?? '' } } },
@@ -31,6 +40,10 @@ export default function Room() {
     }
   }, [presence, profile])
 
+  if (auth.user === null) {
+    redirect('/')
+  }
+
   if (!profile) {
     return null
   }
@@ -39,7 +52,7 @@ export default function Room() {
     <main className={styles.main}>
       <PresentUsers roomId={roomId} />
       <CreatePostForm roomId={roomId} profileId={profile.id} />
-      <ul className={styles.postList}>
+      <ul className={styles.posts}>
         {query.data?.posts.map(post => (
           <CreatePostForm
             key={post.id}

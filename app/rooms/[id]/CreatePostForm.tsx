@@ -26,8 +26,8 @@ export function CreatePostForm(props: {
     null
   )
   const [content, setContent] = useState(props.post?.content ?? '')
-  const isDirty = content !== props.post?.content
-
+  const isAuthor = props.post?.author?.id === props.profileId
+  const isDirty = content !== props.post?.content && isAuthor
   const sentiment = useSentimentAnalyser()
 
   const debouncedClassify = debounce((text: string) => {
@@ -45,6 +45,51 @@ export function CreatePostForm(props: {
     }
   }, [content, debouncedClassify, selectedSentiment, sentiment.result])
 
+  async function createPost(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const content = formData.get('content') as string
+    const postId = formData.get('postId') as string
+    const profileId = formData.get('profileId') as string
+    const roomId = formData.get('roomId') as string
+    const sentiment = formData.get('sentiment') as string
+    if (!isSentiment(sentiment)) {
+      throw new Error('Invalid sentiment')
+    }
+    event.currentTarget.reset()
+    setContent('')
+    setSelectedSentiment(null)
+    await db.transact([
+      db.tx.posts[postId].update({
+        content,
+        roomId,
+        sentiment,
+      }),
+      db.tx.posts[postId].link({ author: profileId }),
+    ])
+  }
+
+  async function updatePost(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const content = formData.get('content') as string
+    const postId = formData.get('postId') as string
+    const profileId = formData.get('profileId') as string
+    const roomId = formData.get('roomId') as string
+    const sentiment = formData.get('sentiment') as string
+    if (!isSentiment(sentiment)) {
+      throw new Error('Invalid sentiment')
+    }
+    await db.transact([
+      db.tx.posts[postId].update({
+        content,
+        roomId,
+        sentiment,
+      }),
+      db.tx.posts[postId].link({ author: profileId }),
+    ])
+  }
+
   return (
     <form
       className={styles.form}
@@ -53,7 +98,7 @@ export function CreatePostForm(props: {
           event.currentTarget.requestSubmit()
         }
       }}
-      onSubmit={createOrUpdatePost}
+      onSubmit={isAuthor ? updatePost : createPost}
     >
       <input type="hidden" name="postId" value={props.post?.id ?? id()} />
       <input type="hidden" name="profileId" value={props.profileId} />
@@ -66,17 +111,18 @@ export function CreatePostForm(props: {
           setSelectedSentiment(null)
         }}
         placeholder="What's on your mind?"
+        readOnly={props.post && !isAuthor}
         required
-        value={content}
+        value={isAuthor ? content : props.post?.content}
       />
       <footer>
         {props.post && !isDirty ? (
           <SentimentInput
             id={`${props.post.sentiment}-${props.post.id}`}
             label={props.post.sentiment as Sentiment}
-            value={props.post.sentiment as Sentiment}
             onChange={setSelectedSentiment}
             readOnly
+            value={props.post.sentiment as Sentiment}
           />
         ) : (
           <SentimentInputs
@@ -86,18 +132,21 @@ export function CreatePostForm(props: {
           />
         )}
         <div>
-          <Button disabled={!isDirty || !content.trim().length}>
-            {props.post ? 'Save' : 'Create'}
-          </Button>
-          {props.post && (
-            <Button
-              onClick={() => {
-                if (props.post) deletePost(props.post?.id)
-              }}
-              type="button"
-            >
-              Delete
-            </Button>
+          {!props.post && <Button>Create</Button>}
+          {isAuthor && (
+            <>
+              <Button disabled={!isDirty || !content.trim().length}>
+                Save
+              </Button>
+              <Button
+                onClick={() => {
+                  if (props.post) deletePost(props.post?.id)
+                }}
+                type="button"
+              >
+                Delete
+              </Button>
+            </>
           )}
         </div>
       </footer>
@@ -107,26 +156,4 @@ export function CreatePostForm(props: {
 
 function deletePost(postId: string) {
   db.transact(db.tx.posts[postId].delete())
-}
-
-function createOrUpdatePost(event: FormEvent<HTMLFormElement>) {
-  event.preventDefault()
-  const formData = new FormData(event.currentTarget)
-  const content = formData.get('content') as string
-  const postId = formData.get('postId') as string
-  const profileId = formData.get('profileId') as string
-  const roomId = formData.get('roomId') as string
-  const sentiment = formData.get('sentiment') as string
-  if (!isSentiment(sentiment)) {
-    throw new Error('Invalid sentiment')
-  }
-  db.transact([
-    db.tx.posts[postId].update({
-      content,
-      roomId,
-      sentiment,
-    }),
-    db.tx.posts[postId].link({ author: profileId }),
-  ])
-  event.currentTarget.reset()
 }
