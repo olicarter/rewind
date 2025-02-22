@@ -39,7 +39,12 @@ export default function Room() {
       <CreatePostForm roomId={roomId} profileId={profile.id} />
       <ul className={styles.postList}>
         {query.data?.posts.map(post => (
-          <Post key={post.id} post={post} profile={profile} />
+          <CreatePostForm
+            key={post.id}
+            post={post}
+            profileId={profile.id}
+            roomId={roomId}
+          />
         ))}
       </ul>
     </main>

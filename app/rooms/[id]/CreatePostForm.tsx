@@ -3,17 +3,32 @@
 import { db } from '@/app/db'
 import { FormEvent, useEffect, useState } from 'react'
 import styles from './CreatePostForm.module.css'
-import { id } from '@instantdb/react'
+import { id, InstaQLEntity } from '@instantdb/react'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
-import { Sentiment, useSentiment } from '@/hooks/useSentiment/useSentiment'
+import {
+  isSentiment,
+  Sentiment,
+  useSentimentAnalyser,
+} from '@/hooks/useSentimentAnalyser'
 import { debounce } from 'lodash'
-import { SentimentInput } from './SentimentInput'
+import { SentimentInput, SentimentInputs } from './SentimentInputs'
+import schema from '@/instant.schema'
 
-export function CreatePostForm(props: { roomId: string; profileId: string }) {
-  const [sentimentValue, setSentimentValue] = useState<Sentiment | null>(null)
+export type Post = InstaQLEntity<typeof schema, 'posts', { author: {} }>
 
-  const sentiment = useSentiment()
+export function CreatePostForm(props: {
+  post?: Post
+  profileId: string
+  roomId: string
+}) {
+  const [selectedSentiment, setSelectedSentiment] = useState<Sentiment | null>(
+    null
+  )
+  const [content, setContent] = useState(props.post?.content ?? '')
+  const isDirty = content !== props.post?.content
+
+  const sentiment = useSentimentAnalyser()
 
   const debouncedClassify = debounce((text: string) => {
     sentiment.classify(text)
@@ -24,6 +39,12 @@ export function CreatePostForm(props: { roomId: string; profileId: string }) {
     return () => debouncedClassify.cancel()
   }, [debouncedClassify])
 
+  useEffect(() => {
+    if (!selectedSentiment || (sentiment.result && content.trim().length)) {
+      debouncedClassify(content)
+    }
+  }, [content, debouncedClassify, selectedSentiment, sentiment.result])
+
   return (
     <form
       className={styles.form}
@@ -32,40 +53,73 @@ export function CreatePostForm(props: { roomId: string; profileId: string }) {
           event.currentTarget.requestSubmit()
         }
       }}
-      onSubmit={createPost}
+      onSubmit={createOrUpdatePost}
     >
-      <input type="hidden" name="roomId" value={props.roomId} />
+      <input type="hidden" name="postId" value={props.post?.id ?? id()} />
       <input type="hidden" name="profileId" value={props.profileId} />
+      <input type="hidden" name="roomId" value={props.roomId} />
       <TextArea
-        autoFocus
+        autoFocus={!props.post}
         name="content"
         onChange={event => {
-          if (!sentimentValue) {
-            debouncedClassify(event.target.value)
-          }
+          setContent(event.target.value)
+          setSelectedSentiment(null)
         }}
+        placeholder="What's on your mind?"
         required
+        value={content}
       />
       <footer>
-        <SentimentInput
-          onChange={setSentimentValue}
-          sentiment={sentiment.result}
-          value={sentimentValue}
-        />
-        <Button>Create post</Button>
+        {props.post && !isDirty ? (
+          <SentimentInput
+            id={`${props.post.sentiment}-${props.post.id}`}
+            label={props.post.sentiment as Sentiment}
+            value={props.post.sentiment as Sentiment}
+            onChange={setSelectedSentiment}
+            tabIndex={-1}
+          />
+        ) : (
+          <SentimentInputs
+            analyzedSentiment={sentiment.result}
+            onChange={setSelectedSentiment}
+            selectedSentiment={selectedSentiment}
+          />
+        )}
+        <div>
+          <Button disabled={!isDirty || !content.trim().length}>
+            {props.post ? 'Save' : 'Create'}
+          </Button>
+          {props.post && (
+            <Button
+              onClick={() => {
+                if (props.post) deletePost(props.post?.id)
+              }}
+              type="button"
+            >
+              Delete
+            </Button>
+          )}
+        </div>
       </footer>
     </form>
   )
 }
 
-function createPost(event: FormEvent<HTMLFormElement>) {
+function deletePost(postId: string) {
+  db.transact(db.tx.posts[postId].delete())
+}
+
+function createOrUpdatePost(event: FormEvent<HTMLFormElement>) {
   event.preventDefault()
   const formData = new FormData(event.currentTarget)
   const content = formData.get('content') as string
+  const postId = formData.get('postId') as string
   const profileId = formData.get('profileId') as string
   const roomId = formData.get('roomId') as string
-  const sentiment = formData.get('sentiment') as Sentiment
-  const postId = id()
+  const sentiment = formData.get('sentiment') as string
+  if (!isSentiment(sentiment)) {
+    throw new Error('Invalid sentiment')
+  }
   db.transact([
     db.tx.posts[postId].update({
       content,

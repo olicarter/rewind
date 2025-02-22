@@ -6,12 +6,16 @@ export enum Sentiment {
   NEGATIVE = 'NEGATIVE',
 }
 
+export function isSentiment(value: string): value is Sentiment {
+  return Object.values(Sentiment).includes(value as Sentiment)
+}
+
 export interface SentimentResult {
   label: Sentiment
   score: number
 }
 
-export function useSentiment() {
+export function useSentimentAnalyser() {
   const [result, setResult] = useState<SentimentResult | null>(null)
   const [ready, setReady] = useState<boolean | null>(null)
   const worker = useRef<Worker | null>(null)
@@ -34,7 +38,19 @@ export function useSentiment() {
           setReady(true)
           break
         case 'complete':
-          setResult(e.data.output[0])
+          const output = e.data.output[0]
+          if (output) {
+            // This is the score threshold for the model to classify a sentiment as neutral.
+            // Model: Xenova/distilbert-base-uncased-finetuned-sst-2-english
+            const threshold = 0.88
+            setResult({
+              label:
+                output.score < threshold ? Sentiment.NEUTRAL : output.label,
+              score: output.score,
+            })
+          } else {
+            setResult(null)
+          }
           break
       }
     }

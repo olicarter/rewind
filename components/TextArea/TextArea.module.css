@@ -1,14 +1,14 @@
 .textArea {
-  background-color: var(--color-layer);
+  background-color: transparent;
   border: none;
   border-radius: 0.5rem;
   color: white;
   line-height: 1.5;
-  min-height: 5.5rem; /* 3 rows */
-  padding: 0.875rem 1rem;
+  min-height: 3.75rem; /* 3 rows */
+  padding: 0;
   resize: none;
 }
 
 .textArea:focus-visible {
-  outline: 2px solid var(--color-foreground);
+  outline: none;
 }

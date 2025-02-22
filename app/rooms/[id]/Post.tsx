@@ -7,6 +7,7 @@ import { TextArea } from '@/components/TextArea'
 import styles from './Post.module.css'
 import { InstaQLEntity } from '@instantdb/react'
 import schema from '@/instant.schema'
+import { Sentiment } from '@/hooks/useSentimentAnalyser'
 
 export type Post = InstaQLEntity<typeof schema, 'posts', { author: {} }>
 export type Profile = InstaQLEntity<typeof schema, 'profiles'>
@@ -33,13 +34,9 @@ export function Post(props: { post: Post; profile: Profile }) {
 
   function updatePost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (value.trim() === '') {
-      deletePost()
-    } else {
-      const formData = new FormData(event.currentTarget)
-      const content = formData.get('content') as string
-      db.transact(db.tx.posts[props.post.id].update({ content }))
-    }
+    const formData = new FormData(event.currentTarget)
+    const content = formData.get('content') as string
+    db.transact(db.tx.posts[props.post.id].update({ content }))
     event.currentTarget.reset()
   }
 
@@ -56,14 +53,18 @@ export function Post(props: { post: Post; profile: Profile }) {
         name="content"
         onChange={event => setValue(event.currentTarget.value)}
         readOnly={!isAuthor}
+        required
         value={value}
       />
       {isAuthor && (
         <footer>
-          <Button disabled={!isDirty}>Save</Button>
-          <Button onClick={deletePost} type="button">
-            Delete
-          </Button>
+          {/* <SentimentLabel sentiment={props.post.sentiment as Sentiment} /> */}
+          <div>
+            <Button disabled={!isDirty}>Save</Button>
+            <Button onClick={deletePost} type="button">
+              Delete
+            </Button>
+          </div>
         </footer>
       )}
     </form>

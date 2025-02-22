@@ -13,3 +13,8 @@
   gap: inherit;
   justify-content: space-between;
 }
+
+.form footer > div {
+  display: flex;
+  gap: inherit;
+}
