@@ -13,6 +13,10 @@
   outline: none;
 }
 
-.textArea:read-only {
+.textArea::placeholder {
+  color: hsla(0, 0%, 100%, 0.5);
+}
+
+.textArea[readonly] {
   cursor: default;
 }

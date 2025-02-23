@@ -10,6 +10,7 @@ import {
   PresentUsers,
 } from './PresentUsers'
 import { isEveryCharUppercase } from '@/utils'
+import { Button } from '@/components/Button/Button'
 
 export default function Room() {
   useAuth()
@@ -44,7 +45,11 @@ export default function Room() {
             meeting.selectedProfileIds
           )}
         />
-        {isHost ? <span>Host</span> : null}
+        {isHost ? (
+          <Button asChild>
+            <label>Host</label>
+          </Button>
+        ) : null}
       </header>
       <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
       <ul className={styles.posts}>

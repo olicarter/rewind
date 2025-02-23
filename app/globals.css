@@ -1,6 +1,6 @@
 :root {
-  --color-background: hsl(0, 0%, 5%);
-  --color-layer: hsla(0, 0%, 100%, 0.1);
+  --color-background: hsl(240, 100%, 70%);
+  --color-layer: hsla(0, 0%, 100%, calc(1 / 6));
   --color-foreground: hsla(0, 0%, 100%, 0.9);
 }
 

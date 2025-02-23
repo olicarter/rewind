@@ -21,6 +21,8 @@ export function PresentUsers(props: {
     event: ChangeEvent<HTMLInputElement>,
     profileId: string
   ) {
+    if (!props.isHost) return
+
     const newSelectedProfileIds = new Set(props.selectedProfileIds)
 
     if (event.currentTarget.checked) {
