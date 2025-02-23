@@ -15,15 +15,56 @@ const _schema = i.schema({
     posts: i.entity({
       content: i.string(),
       createdAt: i.date(),
-      roomId: i.string(),
       sentiment: i.string(),
     }),
     profiles: i.entity({
       createdAt: i.date(),
-      nickname: i.string(),
+      name: i.string(),
+    }),
+    meetings: i.entity({
+      roomId: i.string().unique().indexed(),
+      createdAt: i.date(),
+      // JSON serialized array of profile IDs
+      selectedProfileIds: i.string(),
     }),
   },
   links: {
+    meetingsHost: {
+      forward: {
+        on: 'meetings',
+        has: 'one',
+        label: 'host',
+      },
+      reverse: {
+        on: 'profiles',
+        has: 'many',
+        label: 'hostedMeetings',
+      },
+    },
+    meetingsPosts: {
+      forward: {
+        on: 'posts',
+        has: 'many',
+        label: 'posts',
+      },
+      reverse: {
+        on: 'meetings',
+        has: 'one',
+        label: 'meeting',
+      },
+    },
+    meetingsProfiles: {
+      forward: {
+        on: 'meetings',
+        has: 'many',
+        label: 'profiles',
+      },
+      reverse: {
+        on: 'profiles',
+        has: 'many',
+        label: 'meetings',
+      },
+    },
     postsAuthor: {
       forward: {
         on: 'posts',
@@ -52,11 +93,8 @@ const _schema = i.schema({
   rooms: {
     retro: {
       presence: i.entity({
-        isHost: i.boolean(),
         name: i.string(),
         profileId: i.string(),
-        // JSON serialized array of profile IDs
-        selectedProfileIds: i.string(),
       }),
     },
   },

@@ -1,24 +1,21 @@
 'use client'
 
-import { db } from '@/app/db'
+import { db, PostWithAuthor } from '@/app/db'
 import { FormEvent, useEffect, useState } from 'react'
 import styles from './CreatePostForm.module.css'
-import { id, InstaQLEntity } from '@instantdb/react'
+import { id } from '@instantdb/react'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
 import { Sentiment, useSentimentAnalyser } from '@/hooks/useSentimentAnalyser'
 import { debounce } from 'lodash'
 import { SentimentInput, SentimentInputs } from './SentimentInputs'
-import schema from '@/instant.schema'
 import z from 'zod'
-
-export type Post = InstaQLEntity<typeof schema, 'posts', { author: {} }>
 
 const postSchema = z.object({
   content: z.string().trim().min(1, { message: 'Required' }),
+  meetingId: z.string().uuid(),
   postId: z.string().uuid(),
   profileId: z.string().uuid(),
-  roomId: z.string().length(4),
   sentiment: z.nativeEnum(Sentiment),
 })
 
@@ -28,9 +25,9 @@ function parseFormData(event: FormEvent<HTMLFormElement>) {
 }
 
 export function CreatePostForm(props: {
-  post?: Post
+  meetingId: string
+  post?: PostWithAuthor
   profileId: string
-  roomId: string
 }) {
   const [selectedSentiment, setSelectedSentiment] = useState<Sentiment | null>(
     null
@@ -66,11 +63,12 @@ export function CreatePostForm(props: {
     await db.transact([
       db.tx.posts[data.postId].update({
         content: data.content,
-        roomId: data.roomId,
         sentiment: data.sentiment,
       }),
       db.tx.posts[data.postId].link({
         author: data.profileId,
+        // @ts-expect-error InstantDB typing is incorrect
+        meeting: data.meetingId,
       }),
     ])
   }
@@ -85,9 +83,9 @@ export function CreatePostForm(props: {
       }}
       onSubmit={isAuthor ? updatePost : createPost}
     >
+      <input type="hidden" name="meetingId" value={props.meetingId} />
       <input type="hidden" name="postId" value={props.post?.id ?? id()} />
       <input type="hidden" name="profileId" value={props.profileId} />
-      <input type="hidden" name="roomId" value={props.roomId} />
       <TextArea
         autoFocus={!props.post}
         name="content"
@@ -151,11 +149,12 @@ async function updatePost(event: FormEvent<HTMLFormElement>) {
   await db.transact([
     db.tx.posts[data.postId].update({
       content: data.content,
-      roomId: data.roomId,
       sentiment: data.sentiment,
     }),
     db.tx.posts[data.postId].link({
       author: data.profileId,
+      // @ts-expect-error InstantDB typing is incorrect
+      meeting: data.meetingId,
     }),
   ])
 }

@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@/utils'
 import { ComponentPropsWithoutRef } from 'react'
 import styles from './Button.module.css'
 import { Slot } from 'radix-ui'

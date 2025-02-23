@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@/utils'
 import { ComponentPropsWithoutRef } from 'react'
 import styles from './TextInput.module.css'
 

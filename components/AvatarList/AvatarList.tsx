@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import styles from './AvatarList.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@/utils'
 
 interface AvatarListProps {
   children: ReactNode

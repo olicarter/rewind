@@ -1,6 +1,6 @@
 import { SentimentResult, Sentiment } from '@/hooks/useSentimentAnalyser'
 import styles from './SentimentInputs.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@/utils'
 import { useState } from 'react'
 
 interface SentimentInputsProps {

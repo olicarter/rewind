@@ -58,15 +58,24 @@ function JoinRoomForm(props: { user: User }) {
     return null
   }
 
-  function joinRoom(event: FormEvent<HTMLFormElement>) {
+  async function joinRoom(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
-    const nickname = formData.get('nickname') as string
+    const name = formData.get('name') as string
     const roomCode = (formData.get('code') as string).toUpperCase()
     const profileId = query.data?.profiles.at(0)?.id ?? id()
-    db.transact([
-      db.tx.profiles[profileId].update({ nickname }),
+    const { data } = await db.queryOnce({
+      meetings: {
+        $: { where: { roomId: roomCode } },
+      },
+    })
+    const meeting = data?.meetings.at(0)
+    const meetingId = meeting?.id ?? id()
+    await db.transact([
+      db.tx.profiles[profileId].update({ name }),
       db.tx.profiles[profileId].link({ $user: props.user.id }),
+      db.tx.meetings[meetingId].update({ roomId: roomCode }),
+      db.tx.meetings[meetingId].link({ host: profileId }),
     ])
     router.push(`/rooms/${roomCode}`)
   }
@@ -76,8 +85,9 @@ function JoinRoomForm(props: { user: User }) {
       <Form.Field>
         <Form.Label>Name</Form.Label>
         <TextInput
-          defaultValue={query.data.profiles.at(0)?.nickname}
-          name="nickname"
+          autoComplete="off"
+          defaultValue={query.data.profiles.at(0)?.name}
+          name="name"
           required
         />
       </Form.Field>

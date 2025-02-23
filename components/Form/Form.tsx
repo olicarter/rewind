@@ -1,6 +1,6 @@
 import { ComponentProps } from 'react'
 import styles from './Form.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@/utils'
 
 export function Root({ className, ...props }: ComponentProps<'form'>) {
   return <form className={cn(styles.form, className)} {...props} />

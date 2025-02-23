@@ -1,6 +1,6 @@
 import { ComponentPropsWithoutRef, useEffect, useRef } from 'react'
 import styles from './TextArea.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@/utils'
 
 export function TextArea({
   className,
