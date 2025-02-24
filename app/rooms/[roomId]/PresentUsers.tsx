@@ -73,13 +73,13 @@ export function getPresentUsers<
     peers: Record<string, PresenceUser>
   }
 >(presence: Presence) {
-  return [presence.user, ...Object.values(presence.peers)].filter(
-    isDefinedAndHasPeerId
-  )
+  return [presence.user, ...Object.values(presence.peers)]
+    .filter(isDefinedAndHasPeerId)
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 function isDefinedAndHasPeerId<
-  T extends { peerId: string | undefined } | undefined
+  T extends { name: string | undefined; peerId: string | undefined } | undefined
 >(presence: T): presence is T & { peerId: string } {
-  return !!presence && !!presence.peerId
+  return !!presence && !!presence.peerId && !!presence.name
 }
