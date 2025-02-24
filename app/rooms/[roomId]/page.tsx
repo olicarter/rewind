@@ -52,16 +52,14 @@ export default function Room() {
         ) : null}
       </header>
       <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
-      <ul className={styles.posts}>
-        {postsOfSelectedProfiles.map(post => (
-          <CreatePostForm
-            key={post.id}
-            meetingId={meeting.id}
-            post={post}
-            profileId={profile.id}
-          />
-        ))}
-      </ul>
+      {postsOfSelectedProfiles.map(post => (
+        <CreatePostForm
+          key={post.id}
+          meetingId={meeting.id}
+          post={post}
+          profileId={profile.id}
+        />
+      ))}
     </main>
   )
 }

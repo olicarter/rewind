@@ -29,10 +29,11 @@ export function CreatePostForm(props: {
   post?: PostWithAuthor
   profileId: string
 }) {
+  const [content, setContent] = useState(props.post?.content ?? '')
+  const [isTextAreaFocused, setIsTextAreaFocused] = useState(false)
   const [selectedSentiment, setSelectedSentiment] = useState<Sentiment | null>(
     null
   )
-  const [content, setContent] = useState(props.post?.content ?? '')
   const isAuthor = props.post?.author?.id === props.profileId
   const isDirty = content.trim() !== props.post?.content && isAuthor
   const sentiment = useSentimentAnalyser()
@@ -76,6 +77,12 @@ export function CreatePostForm(props: {
   return (
     <form
       className={styles.form}
+      onFocus={() => {
+        if (isAuthor) setIsTextAreaFocused(true)
+      }}
+      onBlur={() => {
+        if (isAuthor) setIsTextAreaFocused(false)
+      }}
       onKeyDown={event => {
         if (event.metaKey && event.key === 'Enter') {
           event.currentTarget.requestSubmit()
@@ -96,10 +103,11 @@ export function CreatePostForm(props: {
         placeholder="What's on your mind?"
         readOnly={props.post && !isAuthor}
         required
+        tabIndex={!props.post || isAuthor ? 0 : -1}
         value={isAuthor ? content : props.post?.content}
       />
       <footer>
-        {props.post && !isDirty ? (
+        {props.post && !isDirty && !isTextAreaFocused ? (
           <SentimentInput
             id={`${props.post.sentiment}-${props.post.id}`}
             label={props.post.sentiment as Sentiment}
