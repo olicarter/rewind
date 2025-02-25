@@ -61,6 +61,7 @@ export function useSentimentAnalyser() {
 
   const classify = useCallback((text: string) => {
     if (workerRef.current) {
+      console.log('classify', text)
       workerRef.current.postMessage({ text })
     }
   }, [])

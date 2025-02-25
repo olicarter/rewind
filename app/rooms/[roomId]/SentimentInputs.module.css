@@ -29,18 +29,21 @@
 }
 
 .label.positive {
-  background-color: hsl(100, 100%, 32%);
+  background-color: #18ac91;
+  color: var(--color-background);
 }
 
 .label.negative {
-  background-color: hsl(340, 80%, 40%);
+  background-color: #f88070;
+  color: var(--color-background);
 }
 
 .label.neutral {
-  background-color: hsl(50, 100%, 35%);
+  background-color: #e5b95c;
+  color: var(--color-background);
 }
 
-.inputs input[type='radio']:checked + label,
-.inputs input[type='radio']:focus-visible + label {
+.inputs input[type='radio']:not([readonly]):checked + label,
+.inputs input[type='radio']:not([readonly]):focus-visible + label {
   outline: 2px solid white;
 }

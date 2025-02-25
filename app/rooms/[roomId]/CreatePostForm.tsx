@@ -1,168 +1,157 @@
 'use client'
 
 import { db, PostWithAuthor } from '@/app/db'
-import { FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect } from 'react'
 import styles from './CreatePostForm.module.css'
 import { id } from '@instantdb/react'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
 import { Sentiment, useSentimentAnalyser } from '@/hooks/useSentimentAnalyser'
 import { debounce } from 'lodash'
-import { SentimentInput, SentimentInputs } from './SentimentInputs'
+import { SentimentInputs } from './SentimentInputs'
 import z from 'zod'
+import { FormProvider, useForm, useFormContext } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+export type CreatePostFormData = z.infer<typeof postSchema>
 
 const postSchema = z.object({
   content: z.string().trim().min(1, { message: 'Required' }),
-  meetingId: z.string().uuid(),
-  postId: z.string().uuid(),
-  profileId: z.string().uuid(),
+  id: z.string().uuid(),
   sentiment: z.nativeEnum(Sentiment),
 })
-
-function parseFormData(event: FormEvent<HTMLFormElement>) {
-  const formData = new FormData(event.currentTarget)
-  return postSchema.safeParse(Object.fromEntries(formData.entries()))
-}
 
 export function CreatePostForm(props: {
   meetingId: string
   post?: PostWithAuthor
   profileId: string
 }) {
-  const [content, setContent] = useState(props.post?.content ?? '')
-  const [isTextAreaFocused, setIsTextAreaFocused] = useState(false)
-  const [selectedSentiment, setSelectedSentiment] = useState<Sentiment | null>(
-    null
-  )
+  const form = useForm<CreatePostFormData>({
+    defaultValues: {
+      content: props.post?.content ?? '',
+      id: props.post?.id ?? id(),
+      sentiment: props.post?.sentiment as Sentiment,
+    },
+    resolver: zodResolver(postSchema),
+  })
+  const { getFieldState, handleSubmit, register, reset } = form
+
   const isAuthor = props.post?.author?.id === props.profileId
-  const isDirty = content.trim() !== props.post?.content && isAuthor
+
   const sentiment = useSentimentAnalyser()
 
-  const debouncedClassify = debounce((text: string) => {
-    sentiment.classify(text)
-  }, 200)
-
-  // Cleanup debounced function on unmount
-  useEffect(() => {
-    return () => debouncedClassify.cancel()
-  }, [debouncedClassify])
+  const classifyContent = useCallback(debounce(sentiment.classify, 200), [
+    sentiment.classify,
+  ])
 
   useEffect(() => {
-    if (!selectedSentiment || !sentiment.result || content.trim().length > 0) {
-      debouncedClassify(content)
+    if (props.post) {
+      reset({
+        content: props.post.content,
+        id: props.post.id,
+        sentiment: props.post.sentiment as Sentiment,
+      })
     }
-  }, [content, debouncedClassify, selectedSentiment, sentiment.result])
+  }, [props.post, reset])
 
-  async function createPost(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const { data, error } = parseFormData(event)
-    // TODO: Handle errors
-    if (error) return
-    event.currentTarget.reset()
-    setContent('')
-    setSelectedSentiment(null)
+  useEffect(() => {
+    if (!getFieldState('sentiment').isDirty && sentiment.result) {
+      form.setValue('sentiment', sentiment.result.label)
+    }
+  }, [sentiment.result, form])
+
+  async function createOrUpdatePost(data: CreatePostFormData) {
     await db.transact([
-      db.tx.posts[data.postId].update({
+      db.tx.posts[data.id].update({
         content: data.content,
         sentiment: data.sentiment,
       }),
-      db.tx.posts[data.postId].link({
-        author: data.profileId,
-        // @ts-expect-error InstantDB typing is incorrect
-        meeting: data.meetingId,
-      }),
+      ...(isAuthor
+        ? []
+        : [
+            db.tx.posts[data.id].link({
+              author: props.profileId,
+              // @ts-expect-error InstantDB typing is incorrect
+              meeting: props.meetingId,
+            }),
+          ]),
     ])
+    reset()
   }
 
   return (
-    <form
-      className={styles.form}
-      onFocus={() => {
-        if (isAuthor) setIsTextAreaFocused(true)
-      }}
-      onBlur={() => {
-        if (isAuthor) setIsTextAreaFocused(false)
-      }}
-      onKeyDown={event => {
-        if (event.metaKey && event.key === 'Enter') {
-          event.currentTarget.requestSubmit()
-        }
-      }}
-      onSubmit={isAuthor ? updatePost : createPost}
-    >
-      <input type="hidden" name="meetingId" value={props.meetingId} />
-      <input type="hidden" name="postId" value={props.post?.id ?? id()} />
-      <input type="hidden" name="profileId" value={props.profileId} />
-      <TextArea
-        autoFocus={!props.post}
-        name="content"
-        onChange={event => {
-          setContent(event.target.value)
-          setSelectedSentiment(null)
+    <FormProvider {...form}>
+      <form
+        className={styles.form}
+        onKeyDown={event => {
+          if (event.metaKey && event.key === 'Enter') {
+            event.currentTarget.requestSubmit()
+          }
         }}
-        placeholder="What's on your mind?"
-        readOnly={props.post && !isAuthor}
-        required
-        tabIndex={!props.post || isAuthor ? 0 : -1}
-        value={isAuthor ? content : props.post?.content}
-      />
-      <footer>
-        {props.post && !isDirty && !isTextAreaFocused ? (
-          <SentimentInput
-            id={`${props.post.sentiment}-${props.post.id}`}
-            label={props.post.sentiment as Sentiment}
-            onChange={setSelectedSentiment}
-            readOnly
-            value={props.post.sentiment as Sentiment}
-          />
-        ) : (
-          <SentimentInputs
-            analyzedSentiment={sentiment.result}
-            onChange={setSelectedSentiment}
-            selectedSentiment={selectedSentiment}
-          />
-        )}
-        <div>
-          {!props.post && <Button>Create</Button>}
-          {isAuthor && (
-            <>
-              <Button disabled={!isDirty || !content.trim().length}>
-                Save
-              </Button>
-              <Button
-                onClick={() => {
-                  if (props.post) deletePost(props.post?.id)
-                }}
-                type="button"
-              >
-                Delete
-              </Button>
-            </>
-          )}
-        </div>
-      </footer>
-    </form>
+        onSubmit={handleSubmit(createOrUpdatePost)}
+      >
+        <TextArea
+          {...register('content', {
+            onChange: (event: ChangeEvent<HTMLTextAreaElement>) => {
+              if (!getFieldState('sentiment').isDirty) {
+                classifyContent(event.target.value)
+              }
+            },
+          })}
+          placeholder="What's on your mind?"
+          readOnly={props.post && !isAuthor}
+          required
+          tabIndex={!props.post ? 0 : -1}
+        />
+        <footer>
+          <SentimentInputs />
+          <div>
+            <Buttons isAuthor={isAuthor} post={props.post} />
+          </div>
+        </footer>
+      </form>
+    </FormProvider>
   )
 }
 
-function deletePost(postId: string) {
-  db.transact(db.tx.posts[postId].delete())
+function Buttons(props: {
+  isAuthor: boolean
+  post: PostWithAuthor | undefined
+}) {
+  const {
+    formState: { isDirty },
+    reset,
+  } = useFormContext<CreatePostFormData>()
+
+  if (!props.post) return <Button>Create</Button>
+
+  if (!props.isAuthor) return null
+
+  if (isDirty) {
+    return (
+      <>
+        <Button disabled={!isDirty} type="submit">
+          Save
+        </Button>
+        <Button onClick={() => reset()} type="button">
+          Cancel
+        </Button>
+      </>
+    )
+  }
+
+  return <DeleteButton post={props.post} />
 }
 
-async function updatePost(event: FormEvent<HTMLFormElement>) {
-  event.preventDefault()
-  const { data, error } = parseFormData(event)
-  // TODO: Handle errors
-  if (error) return
-  await db.transact([
-    db.tx.posts[data.postId].update({
-      content: data.content,
-      sentiment: data.sentiment,
-    }),
-    db.tx.posts[data.postId].link({
-      author: data.profileId,
-      // @ts-expect-error InstantDB typing is incorrect
-      meeting: data.meetingId,
-    }),
-  ])
+function DeleteButton(props: { post: PostWithAuthor }) {
+  function deletePost() {
+    if (!props.post.id) return
+    db.transact(db.tx.posts[props.post.id].delete())
+  }
+
+  return (
+    <Button onClick={deletePost} type="button">
+      Delete
+    </Button>
+  )
 }

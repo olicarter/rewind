@@ -2,7 +2,7 @@
   display: grid;
   gap: 1rem;
   grid-auto-rows: max-content;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
   min-height: 100vh;
   padding: 1rem;
 }
