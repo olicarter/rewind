@@ -34,7 +34,7 @@ export default function Room() {
   })
 
   return (
-    <main className={styles.main}>
+    <div className={styles.page}>
       <header>
         <PresentUsers
           isHost={isHost}
@@ -52,15 +52,17 @@ export default function Room() {
         ) : null}
       </header>
       <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
-      {postsOfSelectedProfiles.map(post => (
-        <CreatePostForm
-          key={post.id}
-          meetingId={meeting.id}
-          post={post}
-          profileId={profile.id}
-        />
-      ))}
-    </main>
+      <main className={styles.main}>
+        {postsOfSelectedProfiles.map(post => (
+          <CreatePostForm
+            key={post.id}
+            meetingId={meeting.id}
+            post={post}
+            profileId={profile.id}
+          />
+        ))}
+      </main>
+    </div>
   )
 }
 

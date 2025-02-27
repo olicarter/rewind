@@ -1,13 +1,14 @@
 .root {
   align-items: center;
-  background-color: var(--color-layer-2);
+  background-color: var(--color-accent);
   border-radius: 1.25rem;
-  color: #87c3ff;
+  color: var(--color-background);
   display: flex;
   font-weight: 700;
   height: 2.5rem;
   justify-content: center;
   text-transform: uppercase;
+  user-select: none;
   width: 2.5rem;
 }
 
