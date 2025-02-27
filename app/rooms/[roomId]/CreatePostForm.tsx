@@ -1,7 +1,7 @@
 'use client'
 
 import { db, PostWithAuthor } from '@/app/db'
-import { ChangeEvent, useCallback, useEffect } from 'react'
+import { ChangeEvent, useEffect } from 'react'
 import styles from './CreatePostForm.module.css'
 import { id } from '@instantdb/react'
 import { Button } from '@/components/Button'
@@ -12,8 +12,6 @@ import { SentimentInputs } from './SentimentInputs'
 import z from 'zod'
 import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconButton } from '@/components/IconButton'
-import { Trash } from 'lucide-react'
 import { Avatar } from '@/components/Avatar'
 
 export type CreatePostFormData = z.infer<typeof postSchema>
@@ -37,15 +35,13 @@ export function CreatePostForm(props: {
     },
     resolver: zodResolver(postSchema),
   })
-  const { getFieldState, handleSubmit, register, reset } = form
+  const { getFieldState, handleSubmit, register, reset, setValue } = form
 
   const isAuthor = props.post?.author?.id === props.profileId
 
   const sentiment = useSentimentAnalyser()
 
-  const classifyContent = useCallback(debounce(sentiment.classify, 200), [
-    sentiment.classify,
-  ])
+  const classifyContent = debounce(sentiment.classify, 200)
 
   useEffect(() => {
     if (props.post) {
@@ -59,9 +55,9 @@ export function CreatePostForm(props: {
 
   useEffect(() => {
     if (!getFieldState('sentiment').isDirty && sentiment.result) {
-      form.setValue('sentiment', sentiment.result.label)
+      setValue('sentiment', sentiment.result.label)
     }
-  }, [sentiment.result, form])
+  }, [getFieldState, sentiment.result, setValue])
 
   async function createOrUpdatePost(data: CreatePostFormData) {
     await db.transact([
