@@ -15,8 +15,8 @@ export function SentimentInputs() {
   const { getFieldState, register, watch } =
     useFormContext<CreatePostFormData>()
 
-  const readOnly = !getFieldState('content').isDirty
-  const value = watch('sentiment')
+  const [content, value] = watch(['content', 'sentiment'])
+  const readOnly = !!content && !getFieldState('content').isDirty
 
   const [uuid] = useState(crypto.randomUUID())
 

@@ -1,13 +1,29 @@
 .root {
   align-items: center;
-  background-color: white;
+  background-color: var(--color-layer-2);
   border-radius: 1.25rem;
-  color: black;
+  color: #87c3ff;
   display: flex;
   font-weight: 700;
   height: 2.5rem;
   justify-content: center;
   text-transform: uppercase;
+  width: 2.5rem;
+}
+
+.root.small {
+  font-size: 0.875rem;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.root.medium {
+  height: 2rem;
+  width: 2rem;
+}
+
+.root.large {
+  height: 2.5rem;
   width: 2.5rem;
 }
 

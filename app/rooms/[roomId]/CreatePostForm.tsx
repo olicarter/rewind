@@ -12,13 +12,16 @@ import { SentimentInputs } from './SentimentInputs'
 import z from 'zod'
 import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { IconButton } from '@/components/IconButton'
+import { Trash } from 'lucide-react'
+import { Avatar } from '@/components/Avatar'
 
 export type CreatePostFormData = z.infer<typeof postSchema>
 
 const postSchema = z.object({
   content: z.string().trim().min(1, { message: 'Required' }),
   id: z.string().uuid(),
-  sentiment: z.nativeEnum(Sentiment),
+  sentiment: z.nativeEnum(Sentiment).nullable(),
 })
 
 export function CreatePostForm(props: {
@@ -30,7 +33,7 @@ export function CreatePostForm(props: {
     defaultValues: {
       content: props.post?.content ?? '',
       id: props.post?.id ?? id(),
-      sentiment: props.post?.sentiment as Sentiment,
+      sentiment: (props.post?.sentiment as Sentiment) ?? null,
     },
     resolver: zodResolver(postSchema),
   })
@@ -64,7 +67,7 @@ export function CreatePostForm(props: {
     await db.transact([
       db.tx.posts[data.id].update({
         content: data.content,
-        sentiment: data.sentiment,
+        sentiment: data.sentiment ?? undefined,
       }),
       ...(isAuthor
         ? []
@@ -90,9 +93,18 @@ export function CreatePostForm(props: {
         }}
         onSubmit={handleSubmit(createOrUpdatePost)}
       >
+        {props.post && (
+          <header className={styles.header}>
+            <Avatar name={props.post.author?.name ?? ''} size="small" />
+            <h4 className={styles.heading}>{props.post.author?.name}</h4>
+          </header>
+        )}
         <TextArea
           {...register('content', {
             onChange: (event: ChangeEvent<HTMLTextAreaElement>) => {
+              if (!event.target.value.length) {
+                form.setValue('sentiment', null)
+              }
               if (!getFieldState('sentiment').isDirty) {
                 classifyContent(event.target.value)
               }
@@ -130,9 +142,7 @@ function Buttons(props: {
   if (isDirty) {
     return (
       <>
-        <Button disabled={!isDirty} type="submit">
-          Save
-        </Button>
+        <Button>Save</Button>
         <Button onClick={() => reset()} type="button">
           Cancel
         </Button>

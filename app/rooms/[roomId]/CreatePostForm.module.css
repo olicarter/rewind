@@ -8,6 +8,19 @@
   padding: 0.75rem;
 }
 
+.form header {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.heading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  user-select: none;
+}
+
 .form footer {
   display: flex;
   gap: inherit;

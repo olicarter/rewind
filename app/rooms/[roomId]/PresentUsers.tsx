@@ -3,6 +3,7 @@
 import { db } from '@/app/db'
 import styles from './PresentUsers.module.css'
 import { ChangeEvent, Fragment } from 'react'
+import { Button } from '@/components/Button'
 
 interface PresenceUser {
   name: string
@@ -52,9 +53,9 @@ export function PresentUsers(props: {
             readOnly={!props.isHost}
             type="checkbox"
           />
-          <label className={styles.label} htmlFor={presentUser.peerId}>
-            {presentUser.name}
-          </label>
+          <Button asChild className={styles.button}>
+            <label htmlFor={presentUser.peerId}>{presentUser.name}</label>
+          </Button>
         </Fragment>
       ))}
     </ul>

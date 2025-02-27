@@ -46,7 +46,7 @@ export default function Room() {
           )}
         />
         {isHost ? (
-          <Button asChild>
+          <Button asChild disabled>
             <label>Host</label>
           </Button>
         ) : null}
