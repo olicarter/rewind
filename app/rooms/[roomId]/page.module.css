@@ -1,8 +1,8 @@
 .page {
   display: grid;
   gap: 1rem;
-  grid-auto-rows: min-content;
-  grid-template-columns: 24rem 1fr;
+  grid-auto-rows: max-content;
+  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
   grid-template-rows: min-content;
   min-height: 100vh;
   padding: 1rem;
@@ -17,6 +17,13 @@
 .main {
   display: grid;
   gap: inherit;
+  grid-column: 2 / -1;
   grid-auto-rows: max-content;
-  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+  grid-template-columns: subgrid;
+}
+
+@media (max-width: 51rem) {
+  .page {
+    grid-template-columns: unset;
+  }
 }

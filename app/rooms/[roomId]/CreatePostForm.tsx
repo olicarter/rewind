@@ -18,7 +18,7 @@ export type CreatePostFormData = z.infer<typeof postSchema>
 
 const postSchema = z.object({
   content: z.string().trim().min(1, { message: 'Required' }),
-  id: z.string().uuid(),
+  id: z.string().uuid().optional(),
   sentiment: z.nativeEnum(Sentiment).nullable(),
 })
 
@@ -30,7 +30,7 @@ export function CreatePostForm(props: {
   const form = useForm<CreatePostFormData>({
     defaultValues: {
       content: props.post?.content ?? '',
-      id: props.post?.id ?? id(),
+      id: props.post?.id,
       sentiment: (props.post?.sentiment as Sentiment) ?? null,
     },
     resolver: zodResolver(postSchema),
@@ -60,15 +60,16 @@ export function CreatePostForm(props: {
   }, [getFieldState, sentiment.result, setValue])
 
   async function createOrUpdatePost(data: CreatePostFormData) {
+    const postId = data.id ?? id()
     await db.transact([
-      db.tx.posts[data.id].update({
+      db.tx.posts[postId].update({
         content: data.content,
         sentiment: data.sentiment ?? undefined,
       }),
       ...(isAuthor
         ? []
         : [
-            db.tx.posts[data.id].link({
+            db.tx.posts[postId].link({
               author: props.profileId,
               // @ts-expect-error InstantDB typing is incorrect
               meeting: props.meetingId,
