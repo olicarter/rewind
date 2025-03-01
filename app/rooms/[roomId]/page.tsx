@@ -37,27 +37,32 @@ export default function Room() {
   return (
     <div className={styles.page}>
       <header>
-        <PresentUsers
-          authors={uniqBy(
-            posts.map(post => post.author).filter(isDefined),
-            'id'
-          )}
-          isHost={isHost}
-          meetingId={meeting.id}
-          presentProfiles={getPresentUsers(presence).map(presentUser => ({
-            id: presentUser.profileId,
-            name: presentUser.name,
-          }))}
-          roomId={roomId}
-          selectedProfileIds={parseSelectedProfileIds(
-            meeting.selectedProfileIds
-          )}
-        />
-        {isHost ? (
-          <Button asChild disabled>
-            <label>Host</label>
-          </Button>
-        ) : null}
+        <div>
+          {isHost ? (
+            <Button asChild className={styles.hostButton} disabled>
+              <label>Host</label>
+            </Button>
+          ) : null}
+          <PresentUsers
+            authors={uniqBy(
+              posts.map(post => post.author).filter(isDefined),
+              'id'
+            )}
+            isHost={isHost}
+            meetingId={meeting.id}
+            presentProfiles={getPresentUsers(presence).map(presentUser => ({
+              id: presentUser.profileId,
+              name: presentUser.name,
+            }))}
+            roomId={roomId}
+            selectedProfileIds={parseSelectedProfileIds(
+              meeting.selectedProfileIds
+            )}
+          />
+        </div>
+        <Button onClick={() => db.auth.signOut()} type="button">
+          Sign out
+        </Button>
       </header>
       <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
       <main className={styles.main}>
