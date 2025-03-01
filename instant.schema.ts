@@ -26,6 +26,7 @@ const _schema = i.schema({
       createdAt: i.date(),
       // JSON serialized array of profile IDs
       selectedProfileIds: i.string(),
+      stage: i.string(),
     }),
   },
   links: {
