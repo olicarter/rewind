@@ -39,7 +39,7 @@ function SignInForm() {
 
   return (
     <Button asChild>
-      <a href={url}>Continue with Google</a>
+      <a href={url}>Enter with Google</a>
     </Button>
   )
 }
