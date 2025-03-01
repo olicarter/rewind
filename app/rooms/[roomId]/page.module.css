@@ -41,7 +41,8 @@
   text-transform: capitalize;
 }
 
-.stage.active label {
+.stage.active button,
+.stage.active button:hover {
   background-color: var(--color-accent);
   color: var(--color-background);
 }

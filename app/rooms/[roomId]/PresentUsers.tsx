@@ -2,7 +2,7 @@
 
 import { uniqBy } from 'lodash'
 import { ChangeEvent, Fragment } from 'react'
-import { db, Profile } from '@/app/db'
+import { db, Presence, Profile, Stage } from '@/app/db'
 import { Button } from '@/components/Button'
 import styles from './PresentUsers.module.css'
 import { cn } from '@/utils'
@@ -39,7 +39,13 @@ export function PresentUsers(props: PresentUsersProps) {
     ])
   }
 
-  const allProfiles = uniqBy([...props.presentProfiles, ...props.authors], 'id')
+  const allProfiles = uniqBy(
+    [
+      ...props.presentProfiles.map(p => ({ ...p, present: true })),
+      ...props.authors.map(p => ({ ...p, present: false })),
+    ],
+    'id'
+  ).sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <ul className={styles.presentUsers}>
@@ -57,7 +63,8 @@ export function PresentUsers(props: PresentUsersProps) {
             asChild
             className={cn(
               styles.button,
-              props.hostId === profile.id && styles.host
+              props.hostId === profile.id && styles.host,
+              !profile.present && styles.offline
             )}
           >
             <label htmlFor={profile.id}>
@@ -77,18 +84,7 @@ export function parseSelectedProfileIds(
   return JSON.parse(selectedProfileIds ?? '[]')
 }
 
-interface PresenceUser {
-  name: string
-  peerId: string | undefined
-  profileId: string
-}
-
-export function getPresentUsers<
-  Presence extends {
-    user?: PresenceUser
-    peers: Record<string, PresenceUser>
-  }
->(presence: Presence) {
+export function getPresentUsers<P extends Presence>(presence: P) {
   return [presence.user, ...Object.values(presence.peers)]
     .filter(isDefinedAndHasPeerId)
     .sort((a, b) => a.name.localeCompare(b.name))

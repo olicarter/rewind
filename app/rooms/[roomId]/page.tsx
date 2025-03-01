@@ -1,7 +1,7 @@
 'use client'
 
 import { uniqBy } from 'lodash'
-import { redirect, useParams as useNextParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 import { Meeting, PostWithAuthor, Stage, db, stageLabels } from '@/app/db'
 import { Button } from '@/components/Button/Button'
 import { SignInPage } from '@/components/SignInPage/SignInPage'
@@ -16,11 +16,13 @@ import {
 
 export default function Room() {
   const auth = db.useAuth()
-  const { roomId } = useParams()
+  const { roomId } = useParams<{ roomId: string }>()
+
+  // Redirect to the uppercase version of the room ID
+  if (!isEveryCharUppercase(roomId)) redirect(`/rooms/${roomId.toUpperCase()}`)
+
   const { authors, hostId, meeting, posts, profile, selectedProfileIds } =
-    useData({
-      roomId,
-    })
+    useData({ roomId })
 
   const room = db.room('retro', roomId)
   const presence = db.rooms.usePresence(room)
@@ -47,18 +49,16 @@ export default function Room() {
     <div className={styles.page}>
       <header>
         <div>
-          <Stages stage={meeting.stage} />
+          <Stages id={meeting.id} stage={meeting.stage} />
           <hr className={styles.divider} />
           <PresentUsers
-            authors={authors}
+            authors={meeting.stage === Stage.Discussion ? authors : []}
             hostId={hostId}
             isHost={hostId === profile.id}
             meetingId={meeting.id}
             presentProfiles={presentProfiles}
             roomId={roomId}
-            selectedProfileIds={parseSelectedProfileIds(
-              meeting.selectedProfileIds
-            )}
+            selectedProfileIds={selectedProfileIds}
           />
         </div>
         <div>
@@ -67,17 +67,21 @@ export default function Room() {
           </Button>
         </div>
       </header>
-      <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
-      <main className={styles.main}>
-        {postsOfSelectedProfiles.map(post => (
-          <CreatePostForm
-            key={post.id}
-            meetingId={meeting.id}
-            post={post}
-            profileId={profile.id}
-          />
-        ))}
-      </main>
+      {meeting.stage === Stage.Intro && (
+        <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
+      )}
+      {meeting.stage === Stage.Discussion && (
+        <main className={styles.main}>
+          {postsOfSelectedProfiles.map(post => (
+            <CreatePostForm
+              key={post.id}
+              meetingId={meeting.id}
+              post={post}
+              profileId={profile.id}
+            />
+          ))}
+        </main>
+      )}
     </div>
   )
 }
@@ -121,17 +125,11 @@ function useData({ roomId }: { roomId: string }) {
   }
 }
 
-function useParams() {
-  const params = useNextParams<{ roomId: string }>()
-
-  if (!isEveryCharUppercase(params.roomId)) {
-    redirect(`/rooms/${params.roomId.toUpperCase()}`)
+function Stages(props: Pick<Meeting, 'id' | 'stage'>) {
+  async function setStage(stage: Stage) {
+    db.transact([db.tx.meetings[props.id].update({ stage })])
   }
 
-  return params
-}
-
-function Stages(props: Pick<Meeting, 'stage'>) {
   return (
     <ol className={styles.stages}>
       {Object.values(Stage).map(stage => (
@@ -139,9 +137,7 @@ function Stages(props: Pick<Meeting, 'stage'>) {
           className={cn(styles.stage, props.stage === stage && styles.active)}
           key={stage}
         >
-          <Button asChild disabled>
-            <label>{stageLabels[stage]}</label>
-          </Button>
+          <Button onClick={() => setStage(stage)}>{stageLabels[stage]}</Button>
         </li>
       ))}
     </ol>

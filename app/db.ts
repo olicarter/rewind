@@ -8,8 +8,21 @@ export const db = init({
 })
 
 export type Meeting = InstaQLEntity<AppSchema, 'meetings'>
+
 export type PostWithAuthor = InstaQLEntity<AppSchema, 'posts', { author: {} }>
+
 export type Profile = InstaQLEntity<AppSchema, 'profiles'>
+
+export interface PresenceUser {
+  name: string
+  peerId: string | undefined
+  profileId: string
+}
+
+export interface Presence {
+  user?: PresenceUser
+  peers: Record<string, PresenceUser>
+}
 
 export enum Stage {
   Intro = 'intro',
