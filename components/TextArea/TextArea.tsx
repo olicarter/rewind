@@ -12,10 +12,18 @@ export function TextArea({
   const localRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    setHeight()
+    fitHeightToContent()
   }, [props.value])
 
-  function setHeight() {
+  // Update height when the viewport size changes
+  useEffect(() => {
+    window.addEventListener('resize', fitHeightToContent)
+    return () => {
+      window.removeEventListener('resize', fitHeightToContent)
+    }
+  }, [])
+
+  function fitHeightToContent() {
     if (localRef.current) {
       localRef.current.style.height = 'auto'
       localRef.current.style.height = `${localRef.current.scrollHeight}px`
@@ -25,7 +33,7 @@ export function TextArea({
   return (
     <textarea
       className={cn(styles.textArea, className)}
-      onInput={setHeight}
+      onInput={fitHeightToContent}
       ref={element => {
         ref?.(element)
         localRef.current = element
