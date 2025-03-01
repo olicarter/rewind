@@ -4,6 +4,7 @@ import { uniqBy } from 'lodash'
 import { redirect, useParams as useNextParams } from 'next/navigation'
 import { PostWithAuthor, db } from '@/app/db'
 import { Button } from '@/components/Button/Button'
+import { SignInPage } from '@/components/SignInPage/SignInPage'
 import { isEveryCharUppercase, isDefined } from '@/utils'
 import { CreatePostForm } from './CreatePostForm'
 import styles from './page.module.css'
@@ -12,7 +13,6 @@ import {
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
-import { SignInPage } from '@/components/SignInPage/SignInPage'
 
 export default function Room() {
   const auth = db.useAuth()
