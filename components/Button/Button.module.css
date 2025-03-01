@@ -29,7 +29,8 @@
   cursor: pointer;
 }
 
-.button:hover:enabled {
+.button:hover:enabled,
+a.button:hover {
   background-color: var(--color-layer-2);
   color: var(--color-accent);
 }
