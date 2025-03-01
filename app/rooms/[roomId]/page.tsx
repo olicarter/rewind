@@ -23,8 +23,15 @@ export default function Room() {
   // Redirect to the uppercase version of the room ID
   if (!isEveryCharUppercase(roomId)) redirect(`/rooms/${roomId.toUpperCase()}`)
 
-  const { authors, hostId, meeting, posts, profile, selectedProfileIds } =
-    useData({ roomId })
+  const {
+    authors,
+    hostId,
+    isHost,
+    meeting,
+    posts,
+    profile,
+    selectedProfileIds,
+  } = useData({ roomId })
 
   const room = db.room('retro', roomId)
   const presence = db.rooms.usePresence(room)
@@ -62,12 +69,16 @@ export default function Room() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
-          <Stages id={meeting.id} stage={meeting.stage} />
+          <Stages
+            isHost={isHost}
+            meetingId={meeting.id}
+            meetingStage={meeting.stage as Stage}
+          />
           <hr className={styles.divider} />
           <PresentUsers
             authors={meeting.stage === Stage.Discussion ? authors : []}
             hostId={hostId}
-            isHost={hostId === profile.id}
+            isHost={isHost}
             meetingId={meeting.id}
             meetingStage={meeting.stage as Stage}
             presentProfiles={presentProfiles}
@@ -133,6 +144,7 @@ function useData({ roomId }: { roomId: string }) {
   return {
     authors,
     hostId,
+    isHost: hostId === profile?.id,
     meeting,
     posts,
     profile,
@@ -140,10 +152,15 @@ function useData({ roomId }: { roomId: string }) {
   }
 }
 
-function Stages(props: Pick<Meeting, 'id' | 'stage'>) {
+function Stages(props: {
+  isHost: boolean
+  meetingId: string
+  meetingStage: Stage
+}) {
   async function setStage(stage: Stage) {
+    if (!props.isHost) return
     db.transact([
-      db.tx.meetings[props.id].update({
+      db.tx.meetings[props.meetingId].update({
         selectedProfileIds: JSON.stringify([]),
         stage,
       }),
@@ -154,10 +171,15 @@ function Stages(props: Pick<Meeting, 'id' | 'stage'>) {
     <ol className={styles.stages}>
       {Object.values(Stage).map(stage => (
         <li
-          className={cn(styles.stage, props.stage === stage && styles.active)}
+          className={cn(
+            styles.stage,
+            props.meetingStage === stage && styles.active
+          )}
           key={stage}
         >
-          <Button onClick={() => setStage(stage)}>{stageLabels[stage]}</Button>
+          <Button disabled={!props.isHost} onClick={() => setStage(stage)}>
+            {stageLabels[stage]}
+          </Button>
         </li>
       ))}
     </ol>

@@ -52,9 +52,14 @@
 }
 
 .stage.active button,
-.stage.active button:hover {
+.stage.active button:hover:enabled {
   background-color: var(--color-accent);
   color: var(--color-background);
+}
+
+.stage button:disabled {
+  cursor: default;
+  opacity: 1;
 }
 
 .hostButton {
