@@ -58,7 +58,8 @@ function JoinRoomForm(props: { user: User }) {
       meetings: { $: { where: { roomId: formData.roomId } } },
       profiles: { $: { where: { $user: formData.userId } }, $user: {} },
     })
-    const meetingId = query.data?.meetings.at(0)?.id ?? id()
+    const meeting = query.data?.meetings.at(0)
+    const meetingId = meeting?.id ?? id()
     const profileId = query.data?.profiles.at(0)?.id ?? id()
     try {
       await db.transact([
@@ -66,7 +67,7 @@ function JoinRoomForm(props: { user: User }) {
         db.tx.profiles[profileId].link({ $user: formData.userId }),
         db.tx.meetings[meetingId].update({
           roomId: formData.roomId,
-          stage: 'intro',
+          stage: meeting?.stage ?? 'intro',
         }),
         db.tx.meetings[meetingId].link({ host: profileId }),
       ])
