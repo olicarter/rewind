@@ -2,7 +2,6 @@
   display: grid;
   gap: 1rem;
   grid-auto-rows: max-content;
-  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
   min-height: 100vh;
   padding: 1rem;
 }
@@ -28,6 +27,17 @@
   padding: 0;
 }
 
+.main {
+  display: grid;
+  gap: inherit;
+}
+
+.posts {
+  display: grid;
+  gap: inherit;
+  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+}
+
 .stages {
   display: flex;
   gap: 0.75rem;
@@ -50,18 +60,4 @@
 .hostButton {
   border: 1px solid var(--color-accent);
   color: var(--color-accent);
-}
-
-.main {
-  display: grid;
-  gap: inherit;
-  grid-column: 2 / -1;
-  grid-auto-rows: max-content;
-  grid-template-columns: subgrid;
-}
-
-@media (max-width: 51rem) {
-  .page {
-    grid-template-columns: unset;
-  }
 }

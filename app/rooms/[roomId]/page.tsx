@@ -40,10 +40,19 @@ export default function Room() {
     name: presentUser.name,
   }))
 
+  const postsOfCurrentProfile = posts.filter(
+    post => post.author?.id === profile.id
+  )
+
   const postsOfSelectedProfiles = posts.filter(post => {
     if (selectedProfileIds.length === 0) return true
     return post.author && selectedProfileIds.includes(post.author.id)
   })
+
+  const postsToDisplay =
+    meeting.stage === Stage.Discussion
+      ? postsOfSelectedProfiles
+      : postsOfCurrentProfile
 
   return (
     <div className={styles.page}>
@@ -56,6 +65,7 @@ export default function Room() {
             hostId={hostId}
             isHost={hostId === profile.id}
             meetingId={meeting.id}
+            meetingStage={meeting.stage as Stage}
             presentProfiles={presentProfiles}
             roomId={roomId}
             selectedProfileIds={selectedProfileIds}
@@ -67,12 +77,12 @@ export default function Room() {
           </Button>
         </div>
       </header>
-      {meeting.stage === Stage.Intro && (
-        <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
-      )}
-      {meeting.stage === Stage.Discussion && (
-        <main className={styles.main}>
-          {postsOfSelectedProfiles.map(post => (
+      <main className={styles.main}>
+        {meeting.stage === Stage.Intro && (
+          <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
+        )}
+        <ul className={styles.posts}>
+          {postsToDisplay.map(post => (
             <CreatePostForm
               key={post.id}
               meetingId={meeting.id}
@@ -80,8 +90,8 @@ export default function Room() {
               profileId={profile.id}
             />
           ))}
-        </main>
-      )}
+        </ul>
+      </main>
     </div>
   )
 }

@@ -12,6 +12,7 @@ export interface PresentUsersProps {
   hostId: string | undefined
   isHost: boolean
   meetingId: string
+  meetingStage: Stage
   presentProfiles: Pick<Profile, 'id' | 'name'>[]
   roomId: string
   selectedProfileIds: string[]
@@ -47,6 +48,8 @@ export function PresentUsers(props: PresentUsersProps) {
     'id'
   ).sort((a, b) => a.name.localeCompare(b.name))
 
+  const readOnly = !props.isHost || props.meetingStage !== Stage.Discussion
+
   return (
     <ul className={styles.presentUsers}>
       {allProfiles.map(profile => (
@@ -55,23 +58,24 @@ export function PresentUsers(props: PresentUsersProps) {
             checked={props.selectedProfileIds.includes(profile.id)}
             className={styles.input}
             id={profile.id}
-            onChange={event => toggleSelectedProfile(event, profile.id)}
-            readOnly={!props.isHost}
+            onChange={event =>
+              !readOnly && toggleSelectedProfile(event, profile.id)
+            }
+            readOnly={readOnly}
             type="checkbox"
           />
-          <Button
-            asChild
+          <label
             className={cn(
-              styles.button,
+              'button',
+              styles.label,
               props.hostId === profile.id && styles.host,
               !profile.present && styles.offline
             )}
+            htmlFor={profile.id}
           >
-            <label htmlFor={profile.id}>
-              {props.hostId === profile.id && <span>Host</span>}
-              {profile.name}
-            </label>
-          </Button>
+            {props.hostId === profile.id && <span>Host</span>}
+            {profile.name}
+          </label>
         </Fragment>
       ))}
     </ul>
