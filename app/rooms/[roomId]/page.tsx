@@ -142,7 +142,12 @@ function useData({ roomId }: { roomId: string }) {
 
 function Stages(props: Pick<Meeting, 'id' | 'stage'>) {
   async function setStage(stage: Stage) {
-    db.transact([db.tx.meetings[props.id].update({ stage })])
+    db.transact([
+      db.tx.meetings[props.id].update({
+        selectedProfileIds: JSON.stringify([]),
+        stage,
+      }),
+    ])
   }
 
   return (
