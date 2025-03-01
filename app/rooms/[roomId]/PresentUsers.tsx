@@ -3,6 +3,7 @@
 import { uniqBy } from 'lodash'
 import { ChangeEvent, Fragment } from 'react'
 import { db, Presence, Profile, Stage } from '@/app/db'
+import { useKeyDown } from '@/hooks/useKeyDown'
 import { cn } from '@/utils'
 import styles from './PresentUsers.module.css'
 
@@ -18,13 +19,19 @@ export interface PresentUsersProps {
 }
 
 export function PresentUsers(props: PresentUsersProps) {
+  const isShiftKeyDown = useKeyDown('Shift')
+
   function toggleSelectedProfile(
     event: ChangeEvent<HTMLInputElement>,
     profileId: string
   ) {
     if (!props.isHost) return
 
-    const newSelectedProfileIds = new Set(props.selectedProfileIds)
+    const newSelectedProfileIds = new Set(
+      props.selectedProfileIds.length > 1 || isShiftKeyDown
+        ? props.selectedProfileIds
+        : []
+    )
 
     if (event.currentTarget.checked) {
       newSelectedProfileIds.add(profileId)
@@ -63,9 +70,7 @@ export function PresentUsers(props: PresentUsersProps) {
             checked={props.selectedProfileIds.includes(profile.id)}
             className={styles.input}
             id={profile.id}
-            onChange={event =>
-              !readOnly && toggleSelectedProfile(event, profile.id)
-            }
+            onChange={event => toggleSelectedProfile(event, profile.id)}
             readOnly={readOnly}
             type="checkbox"
           />
