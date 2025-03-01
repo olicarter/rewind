@@ -45,7 +45,13 @@ export function PresentUsers(props: PresentUsersProps) {
       ...props.authors.map(p => ({ ...p, present: false })),
     ],
     'id'
-  ).sort((a, b) => a.name.localeCompare(b.name))
+  ).sort((a, b) => {
+    // Host comes first
+    if (a.id === props.hostId) return -1
+    if (b.id === props.hostId) return 1
+    // Otherwise sort alphabetically by name
+    return a.name.localeCompare(b.name)
+  })
 
   const readOnly = !props.isHost || props.meetingStage !== Stage.Discussion
 
