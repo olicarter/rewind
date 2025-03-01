@@ -60,7 +60,7 @@ export default function Room() {
 
   return (
     <div className={styles.page}>
-      <header>
+      <header className={styles.header}>
         <div>
           <Stages id={meeting.id} stage={meeting.stage} />
           <hr className={styles.divider} />

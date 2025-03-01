@@ -6,7 +6,7 @@ import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
 import { CreatePostForm } from './CreatePostForm'
-import styles from './CreatePostForm.module.css'
+import styles from './Post.module.css'
 import { SentimentLabel } from './SentimentInputs'
 
 export function Post(props: {
@@ -31,7 +31,7 @@ export function Post(props: {
   const isAuthor = props.post?.author?.id === props.profileId
 
   return (
-    <form className={styles.form}>
+    <div className={styles.post}>
       {props.post && (
         <header className={styles.header}>
           <Avatar name={props.post.author?.name ?? ''} size="small" />
@@ -52,7 +52,7 @@ export function Post(props: {
           <DeleteButton post={props.post} />
         </div>
       </footer>
-    </form>
+    </div>
   )
 }
 

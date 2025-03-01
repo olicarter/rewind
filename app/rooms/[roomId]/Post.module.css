@@ -1,4 +1,4 @@
-.form {
+.post {
   background-color: var(--color-layer);
   border-radius: 0.5rem;
   display: grid;
@@ -8,7 +8,7 @@
   padding: 0.75rem;
 }
 
-.form header {
+.header {
   align-items: center;
   display: flex;
   gap: 0.5rem;
@@ -21,13 +21,13 @@
   user-select: none;
 }
 
-.form footer {
+.post footer {
   display: flex;
   gap: inherit;
   justify-content: space-between;
 }
 
-.form footer > div {
+.post footer > div {
   display: flex;
   gap: inherit;
 }

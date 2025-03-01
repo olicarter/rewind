@@ -11,7 +11,7 @@ import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
 import { useSentimentAnalyser } from '@/hooks/useSentimentAnalyser'
-import styles from './CreatePostForm.module.css'
+import styles from './Post.module.css'
 import { SentimentInputs } from './SentimentInputs'
 
 export type CreatePostFormData = z.infer<typeof postSchema>
@@ -96,7 +96,7 @@ export function CreatePostForm(props: {
   return (
     <FormProvider {...form}>
       <form
-        className={styles.form}
+        className={styles.post}
         onKeyDown={event => {
           if (event.metaKey && event.key === 'Enter') {
             event.currentTarget.requestSubmit()
@@ -121,6 +121,7 @@ export function CreatePostForm(props: {
               }
             },
           })}
+          autoFocus
           placeholder="What's on your mind?"
           readOnly={props.post && !isAuthor}
           required
