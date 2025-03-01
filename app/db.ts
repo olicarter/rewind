@@ -24,6 +24,12 @@ export interface Presence {
   peers: Record<string, PresenceUser>
 }
 
+export enum Sentiment {
+  POSITIVE = 'POSITIVE',
+  NEUTRAL = 'NEUTRAL',
+  NEGATIVE = 'NEGATIVE',
+}
+
 export enum Stage {
   Intro = 'intro',
   Discussion = 'discussion',

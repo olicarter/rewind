@@ -4,13 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { id } from '@instantdb/react'
 import { debounce } from 'lodash'
 import { ChangeEvent, useEffect } from 'react'
-import { FormProvider, useForm, useFormContext } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { PostWithAuthor, db } from '@/app/db'
+import { PostWithAuthor, Sentiment, db } from '@/app/db'
 import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
-import { Sentiment, useSentimentAnalyser } from '@/hooks/useSentimentAnalyser'
+import { useSentimentAnalyser } from '@/hooks/useSentimentAnalyser'
 import styles from './CreatePostForm.module.css'
 import { SentimentInputs } from './SentimentInputs'
 
@@ -24,6 +24,8 @@ const postSchema = z.object({
 
 export function CreatePostForm(props: {
   meetingId: string
+  onCancel?: () => void
+  onSave?: () => void
   post?: PostWithAuthor
   profileId: string
 }) {
@@ -37,12 +39,13 @@ export function CreatePostForm(props: {
   })
   const { getFieldState, handleSubmit, register, reset, setValue } = form
 
-  const isAuthor = props.post?.author?.id === props.profileId
-
+  // Use the local worker to analyse the sentiment of the post.
   const sentiment = useSentimentAnalyser()
 
+  // Debounce the sentiment analysis to avoid calling the local worker too often.
   const classifyContent = debounce(sentiment.classify, 200)
 
+  // Reset the form values to the post values.
   useEffect(() => {
     if (props.post) {
       reset({
@@ -53,12 +56,17 @@ export function CreatePostForm(props: {
     }
   }, [props.post, reset])
 
+  // Set the sentiment of the post to the result of the sentiment analysis.
   useEffect(() => {
     if (!getFieldState('sentiment').isDirty && sentiment.result) {
       setValue('sentiment', sentiment.result.label)
     }
   }, [getFieldState, sentiment.result, setValue])
 
+  // Check if the current user is the author of the post.
+  const isAuthor = props.post?.author?.id === props.profileId
+
+  // Create or update a post.
   async function createOrUpdatePost(data: CreatePostFormData) {
     const postId = data.id ?? id()
     await db.transact([
@@ -77,6 +85,12 @@ export function CreatePostForm(props: {
           ]),
     ])
     reset()
+    props.onSave?.()
+  }
+
+  // Cancel the form.
+  function cancel() {
+    props.onCancel?.()
   }
 
   return (
@@ -114,51 +128,18 @@ export function CreatePostForm(props: {
         />
         <footer>
           <SentimentInputs />
-          <div>
-            <Buttons isAuthor={isAuthor} post={props.post} />
-          </div>
+          {props.post ? (
+            <div>
+              <Button>Save</Button>
+              <Button onClick={cancel} type="button">
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button>Create</Button>
+          )}
         </footer>
       </form>
     </FormProvider>
-  )
-}
-
-function Buttons(props: {
-  isAuthor: boolean
-  post: PostWithAuthor | undefined
-}) {
-  const {
-    formState: { isDirty },
-    reset,
-  } = useFormContext<CreatePostFormData>()
-
-  if (!props.post) return <Button>Create</Button>
-
-  if (!props.isAuthor) return null
-
-  if (isDirty) {
-    return (
-      <>
-        <Button>Save</Button>
-        <Button onClick={() => reset()} type="button">
-          Cancel
-        </Button>
-      </>
-    )
-  }
-
-  return <DeleteButton post={props.post} />
-}
-
-function DeleteButton(props: { post: PostWithAuthor }) {
-  function deletePost() {
-    if (!props.post.id) return
-    db.transact(db.tx.posts[props.post.id].delete())
-  }
-
-  return (
-    <Button onClick={deletePost} type="button">
-      Delete
-    </Button>
   )
 }

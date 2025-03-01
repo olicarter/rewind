@@ -13,6 +13,7 @@ import {
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
+import { Post } from './Post'
 
 export default function Room() {
   const auth = db.useAuth()
@@ -83,7 +84,7 @@ export default function Room() {
         )}
         <ul className={styles.posts}>
           {postsToDisplay.map(post => (
-            <CreatePostForm
+            <Post
               key={post.id}
               meetingId={meeting.id}
               post={post}

@@ -1,9 +1,36 @@
 import { Fragment, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { Sentiment } from '@/hooks/useSentimentAnalyser'
+import { Sentiment } from '@/app/db'
 import { cn } from '@/utils'
 import { CreatePostFormData } from './CreatePostForm'
 import styles from './SentimentInputs.module.css'
+
+export function SentimentInputs() {
+  const { register } = useFormContext<CreatePostFormData>()
+
+  const [uuid] = useState(crypto.randomUUID())
+
+  return (
+    <div className={styles.inputs}>
+      {Object.values(Sentiment).map(sentiment => {
+        const id = `${sentiment}-${uuid}`
+        return (
+          <Fragment key={sentiment}>
+            <input
+              {...register('sentiment')}
+              className={styles.input}
+              id={id}
+              required
+              type="radio"
+              value={sentiment}
+            />
+            <SentimentLabel htmlFor={id} sentiment={sentiment} />
+          </Fragment>
+        )
+      })}
+    </div>
+  )
+}
 
 const text: Record<Sentiment, string> = {
   [Sentiment.POSITIVE]: 'Good',
@@ -11,39 +38,18 @@ const text: Record<Sentiment, string> = {
   [Sentiment.NEUTRAL]: 'Mixed',
 }
 
-export function SentimentInputs() {
-  const { getFieldState, register, watch } =
-    useFormContext<CreatePostFormData>()
+export interface SentimentLabelProps {
+  htmlFor?: string
+  sentiment: Sentiment
+}
 
-  const [content, value] = watch(['content', 'sentiment'])
-  const readOnly = !!content && !getFieldState('content').isDirty
-
-  const [uuid] = useState(crypto.randomUUID())
-
+export function SentimentLabel(props: SentimentLabelProps) {
   return (
-    <div className={styles.inputs}>
-      {Object.values(Sentiment)
-        .filter(sentiment => (readOnly ? sentiment === value : true))
-        .map(sentiment => (
-          <Fragment key={sentiment}>
-            <input
-              {...register('sentiment')}
-              className={styles.input}
-              id={`${sentiment}-${uuid}`}
-              readOnly={readOnly}
-              required
-              tabIndex={readOnly ? -1 : 0}
-              type="radio"
-              value={sentiment}
-            />
-            <label
-              className={cn(styles.label, styles[sentiment.toLowerCase()])}
-              htmlFor={`${sentiment}-${uuid}`}
-            >
-              {text[sentiment]}
-            </label>
-          </Fragment>
-        ))}
-    </div>
+    <label
+      className={cn(styles.label, styles[props.sentiment.toLowerCase()])}
+      htmlFor={props.htmlFor}
+    >
+      {text[props.sentiment]}
+    </label>
   )
 }

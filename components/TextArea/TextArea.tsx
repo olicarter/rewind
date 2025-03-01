@@ -8,7 +8,7 @@ export function TextArea({
   ref,
   rows = 1,
   ...props
-}: ComponentPropsWithoutRef<'textarea'> & { ref: RefCallBack }) {
+}: ComponentPropsWithoutRef<'textarea'> & { ref?: RefCallBack }) {
   const localRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function TextArea({
       className={cn(styles.textArea, className)}
       onInput={setHeight}
       ref={element => {
-        ref(element)
+        ref?.(element)
         localRef.current = element
       }}
       rows={rows}
