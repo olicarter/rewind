@@ -1,5 +1,5 @@
-import { cn } from '@/utils'
 import { Avatar as RadixAvatar } from 'radix-ui'
+import { cn } from '@/utils'
 import styles from './Avatar.module.css'
 
 interface AvatarProps {

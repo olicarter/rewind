@@ -1,9 +1,9 @@
-import { Sentiment } from '@/hooks/useSentimentAnalyser'
-import styles from './SentimentInputs.module.css'
-import { cn } from '@/utils'
 import { Fragment, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { Sentiment } from '@/hooks/useSentimentAnalyser'
+import { cn } from '@/utils'
 import { CreatePostFormData } from './CreatePostForm'
+import styles from './SentimentInputs.module.css'
 
 const text: Record<Sentiment, string> = {
   [Sentiment.POSITIVE]: 'Good',

@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, CSSProperties } from 'react'
+import { CSSProperties, Fragment } from 'react'
 import styles from './ColorInput.module.css'
 
 export function ColorInput() {

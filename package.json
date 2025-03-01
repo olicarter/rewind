@@ -31,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
+    "eslint-plugin-import": "^2.31.0",
     "typescript": "^5"
   },
   "prettier": {

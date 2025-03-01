@@ -1,13 +1,13 @@
 'use client'
 
-import { FormEvent } from 'react'
-import styles from './page.module.css'
-import { db } from './db'
+import { User, id } from '@instantdb/react'
 import { useRouter } from 'next/navigation'
-import { id, User } from '@instantdb/react'
+import { FormEvent } from 'react'
 import { Button } from '@/components/Button'
-import { TextInput } from '@/components/TextInput'
 import * as Form from '@/components/Form'
+import { TextInput } from '@/components/TextInput'
+import { db } from './db'
+import styles from './page.module.css'
 
 export default function Home() {
   const auth = db.useAuth()

@@ -1,7 +1,7 @@
 import { ComponentPropsWithoutRef, useEffect, useRef } from 'react'
-import styles from './TextArea.module.css'
-import { cn } from '@/utils'
 import { RefCallBack } from 'react-hook-form'
+import { cn } from '@/utils'
+import styles from './TextArea.module.css'
 
 export function TextArea({
   className,

@@ -1,4 +1,4 @@
-import { init, InstaQLEntity } from '@instantdb/react'
+import { InstaQLEntity, init } from '@instantdb/react'
 import schema, { AppSchema } from '@/instant.schema'
 
 export const db = init({

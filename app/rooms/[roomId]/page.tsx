@@ -1,16 +1,16 @@
 'use client'
 
-import { db, PostWithAuthor } from '@/app/db'
-import styles from './page.module.css'
 import { redirect, useParams as useNextParams } from 'next/navigation'
+import { PostWithAuthor, db } from '@/app/db'
+import { Button } from '@/components/Button/Button'
+import { isEveryCharUppercase } from '@/utils'
 import { CreatePostForm } from './CreatePostForm'
+import styles from './page.module.css'
 import {
+  PresentUsers,
   getPresentUsers,
   parseSelectedProfileIds,
-  PresentUsers,
 } from './PresentUsers'
-import { isEveryCharUppercase } from '@/utils'
-import { Button } from '@/components/Button/Button'
 
 export default function Room() {
   useAuth()

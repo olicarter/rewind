@@ -1,9 +1,9 @@
 'use client'
 
-import { db } from '@/app/db'
-import styles from './PresentUsers.module.css'
 import { ChangeEvent, Fragment } from 'react'
+import { db } from '@/app/db'
 import { Button } from '@/components/Button'
+import styles from './PresentUsers.module.css'
 
 interface PresenceUser {
   name: string

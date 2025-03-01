@@ -1,7 +1,8 @@
-import { cn } from '@/utils'
-import { ComponentPropsWithoutRef } from 'react'
-import styles from './IconButton.module.css'
 import { LucideIcon } from 'lucide-react'
+import { ComponentPropsWithoutRef } from 'react'
+import { cn } from '@/utils'
+import styles from './IconButton.module.css'
+
 
 interface IconButtonProps
   extends Omit<ComponentPropsWithoutRef<'button'>, 'children'> {
