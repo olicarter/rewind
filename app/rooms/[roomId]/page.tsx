@@ -45,8 +45,6 @@ export default function Room() {
           if (selectedProfileIds.length === 0) return true
           return post.author && selectedProfileIds.includes(post.author.id)
         })
-      case Stage.Feedback:
-        return []
       default:
         return []
     }
