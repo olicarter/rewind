@@ -1,13 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { PostWithAuthor, Sentiment, db } from '@/app/db'
 import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
+import { CreatePostForm } from './CreatePostForm'
 import styles from './CreatePostForm.module.css'
 import { SentimentLabel } from './SentimentInputs'
-import { useState } from 'react'
-import { CreatePostForm } from './CreatePostForm'
 
 export function Post(props: {
   meetingId: string

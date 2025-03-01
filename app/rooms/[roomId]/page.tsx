@@ -8,12 +8,12 @@ import { SignInPage } from '@/components/SignInPage/SignInPage'
 import { isEveryCharUppercase, isDefined, cn } from '@/utils'
 import { CreatePostForm } from './CreatePostForm'
 import styles from './page.module.css'
+import { Post } from './Post'
 import {
   PresentUsers,
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
-import { Post } from './Post'
 
 export default function Room() {
   const auth = db.useAuth()

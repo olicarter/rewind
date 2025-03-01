@@ -3,9 +3,8 @@
 import { uniqBy } from 'lodash'
 import { ChangeEvent, Fragment } from 'react'
 import { db, Presence, Profile, Stage } from '@/app/db'
-import { Button } from '@/components/Button'
-import styles from './PresentUsers.module.css'
 import { cn } from '@/utils'
+import styles from './PresentUsers.module.css'
 
 export interface PresentUsersProps {
   authors: Pick<Profile, 'id' | 'name'>[]
