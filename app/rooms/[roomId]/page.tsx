@@ -3,7 +3,7 @@
 import { redirect, useParams as useNextParams } from 'next/navigation'
 import { PostWithAuthor, db } from '@/app/db'
 import { Button } from '@/components/Button/Button'
-import { isEveryCharUppercase } from '@/utils'
+import { isEveryCharUppercase, isDefined } from '@/utils'
 import { CreatePostForm } from './CreatePostForm'
 import styles from './page.module.css'
 import {
@@ -11,6 +11,7 @@ import {
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
+import { uniqBy } from 'lodash'
 
 export default function Room() {
   useAuth()
@@ -37,9 +38,16 @@ export default function Room() {
     <div className={styles.page}>
       <header>
         <PresentUsers
+          authors={uniqBy(
+            posts.map(post => post.author).filter(isDefined),
+            'id'
+          )}
           isHost={isHost}
           meetingId={meeting.id}
-          presentUsers={getPresentUsers(presence)}
+          presentProfiles={getPresentUsers(presence).map(presentUser => ({
+            id: presentUser.profileId,
+            name: presentUser.name,
+          }))}
           roomId={roomId}
           selectedProfileIds={parseSelectedProfileIds(
             meeting.selectedProfileIds

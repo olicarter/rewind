@@ -1,23 +1,21 @@
 'use client'
 
 import { ChangeEvent, Fragment } from 'react'
-import { db } from '@/app/db'
+import { db, Profile } from '@/app/db'
 import { Button } from '@/components/Button'
 import styles from './PresentUsers.module.css'
+import { uniqBy } from 'lodash'
 
-interface PresenceUser {
-  name: string
-  peerId: string | undefined
-  profileId: string
-}
-
-export function PresentUsers(props: {
+export interface PresentUsersProps {
+  authors: Pick<Profile, 'id' | 'name'>[]
   isHost: boolean
   meetingId: string
-  presentUsers: PresenceUser[]
+  presentProfiles: Pick<Profile, 'id' | 'name'>[]
   roomId: string
   selectedProfileIds: string[]
-}) {
+}
+
+export function PresentUsers(props: PresentUsersProps) {
   function toggleSelectedProfile(
     event: ChangeEvent<HTMLInputElement>,
     profileId: string
@@ -39,22 +37,22 @@ export function PresentUsers(props: {
     ])
   }
 
+  const allProfiles = uniqBy([...props.presentProfiles, ...props.authors], 'id')
+
   return (
     <ul className={styles.presentUsers}>
-      {props.presentUsers.map(presentUser => (
-        <Fragment key={presentUser.peerId}>
+      {allProfiles.map(profile => (
+        <Fragment key={profile.id}>
           <input
-            checked={props.selectedProfileIds.includes(presentUser.profileId)}
+            checked={props.selectedProfileIds.includes(profile.id)}
             className={styles.input}
-            id={presentUser.peerId}
-            onChange={event =>
-              toggleSelectedProfile(event, presentUser.profileId)
-            }
+            id={profile.id}
+            onChange={event => toggleSelectedProfile(event, profile.id)}
             readOnly={!props.isHost}
             type="checkbox"
           />
           <Button asChild className={styles.button}>
-            <label htmlFor={presentUser.peerId}>{presentUser.name}</label>
+            <label htmlFor={profile.id}>{profile.name}</label>
           </Button>
         </Fragment>
       ))}
@@ -66,6 +64,12 @@ export function parseSelectedProfileIds(
   selectedProfileIds: string | undefined
 ): string[] {
   return JSON.parse(selectedProfileIds ?? '[]')
+}
+
+interface PresenceUser {
+  name: string
+  peerId: string | undefined
+  profileId: string
 }
 
 export function getPresentUsers<
