@@ -9,3 +9,4 @@ export const db = init({
 
 export type PostWithAuthor = InstaQLEntity<AppSchema, 'posts', { author: {} }>
 export type Profile = InstaQLEntity<AppSchema, 'profiles'>
+export type Stage = 'intro' | 'discussion' | 'feedback' | 'conclusion'

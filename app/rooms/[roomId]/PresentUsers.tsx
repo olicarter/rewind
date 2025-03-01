@@ -1,10 +1,10 @@
 'use client'
 
+import { uniqBy } from 'lodash'
 import { ChangeEvent, Fragment } from 'react'
 import { db, Profile } from '@/app/db'
 import { Button } from '@/components/Button'
 import styles from './PresentUsers.module.css'
-import { uniqBy } from 'lodash'
 
 export interface PresentUsersProps {
   authors: Pick<Profile, 'id' | 'name'>[]

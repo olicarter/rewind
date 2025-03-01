@@ -1,10 +1,14 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import { User, id } from '@instantdb/react'
 import { useRouter } from 'next/navigation'
-import { FormEvent } from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Button } from '@/components/Button'
 import * as Form from '@/components/Form'
+import { SignInPage } from '@/components/SignInPage/SignInPage'
 import { TextInput } from '@/components/TextInput'
 import { db } from './db'
 import styles from './page.module.css'
@@ -12,17 +16,8 @@ import styles from './page.module.css'
 export default function Home() {
   const auth = db.useAuth()
 
-  if (auth.isLoading) {
-    return null
-  }
-
-  if (!auth.user) {
-    return (
-      <main className={styles.main}>
-        <SignInForm />
-      </main>
-    )
-  }
+  if (auth.isLoading) return null
+  if (!auth.user) return <SignInPage />
 
   return (
     <main className={styles.main}>
@@ -31,18 +26,13 @@ export default function Home() {
   )
 }
 
-function SignInForm() {
-  const url = db.auth.createAuthorizationURL({
-    clientName: 'google',
-    redirectURL: window.location.href,
-  })
+const joinRoomSchema = z.object({
+  roomId: z.string().length(4).toUpperCase(),
+  name: z.string().min(1),
+  userId: z.string().uuid(),
+})
 
-  return (
-    <Button asChild>
-      <a href={url}>Enter with Google</a>
-    </Button>
-  )
-}
+type FormValues = z.infer<typeof joinRoomSchema>
 
 function JoinRoomForm(props: { user: User }) {
   const router = useRouter()
@@ -51,53 +41,58 @@ function JoinRoomForm(props: { user: User }) {
     profiles: { $: { where: { $user: props.user.id } }, $user: {} },
   })
 
-  if (!query.data) {
-    return null
-  }
+  const form = useForm<FormValues>({
+    resolver: zodResolver(joinRoomSchema),
+    defaultValues: { name: '', roomId: '', userId: props.user.id },
+  })
+  const { register, handleSubmit, setValue } = form
 
-  async function joinRoom(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const name = formData.get('name') as string
-    const roomCode = (formData.get('code') as string).toUpperCase()
-    const profileId = query.data?.profiles.at(0)?.id ?? id()
-    const { data } = await db.queryOnce({
-      meetings: {
-        $: { where: { roomId: roomCode } },
-      },
+  const name = query.data?.profiles.at(0)?.name
+
+  useEffect(() => {
+    if (name) setValue('name', name)
+  }, [name, setValue])
+
+  async function joinRoom(formData: FormValues) {
+    const query = await db.queryOnce({
+      meetings: { $: { where: { roomId: formData.roomId } } },
+      profiles: { $: { where: { $user: formData.userId } }, $user: {} },
     })
-    const meeting = data?.meetings.at(0)
-    const meetingId = meeting?.id ?? id()
-    await db.transact([
-      db.tx.profiles[profileId].update({ name }),
-      db.tx.profiles[profileId].link({ $user: props.user.id }),
-      db.tx.meetings[meetingId].update({ roomId: roomCode }),
-      db.tx.meetings[meetingId].link({ host: profileId }),
-    ])
-    router.push(`/rooms/${roomCode}`)
+    const meetingId = query.data?.meetings.at(0)?.id ?? id()
+    const profileId = query.data?.profiles.at(0)?.id ?? id()
+    try {
+      await db.transact([
+        db.tx.profiles[profileId].update({ name: formData.name }),
+        db.tx.profiles[profileId].link({ $user: formData.userId }),
+        db.tx.meetings[meetingId].update({
+          roomId: formData.roomId,
+          stage: 'intro',
+        }),
+        db.tx.meetings[meetingId].link({ host: profileId }),
+      ])
+      router.push(`/rooms/${formData.roomId}`)
+    } catch (error) {
+      // TODO: Handle error
+      console.error(error)
+    }
   }
 
   return (
-    <Form.Root className={styles.form} onSubmit={joinRoom}>
+    <Form.Root className={styles.form} onSubmit={handleSubmit(joinRoom)}>
+      <input type="hidden" {...register('userId')} />
       <Form.Field>
         <Form.Label>Name</Form.Label>
-        <TextInput
-          autoComplete="off"
-          defaultValue={query.data.profiles.at(0)?.name}
-          name="name"
-          required
-        />
+        <TextInput {...register('name')} autoComplete="off" />
       </Form.Field>
       <Form.Field>
-        <Form.Label htmlFor="code">Room code</Form.Label>
+        <Form.Label htmlFor="roomId">Room code</Form.Label>
         <TextInput
+          {...register('roomId')}
           autoComplete="off"
           className={styles.codeInput}
-          id="code"
+          id="roomId"
           maxLength={4}
           minLength={4}
-          name="code"
-          required
         />
       </Form.Field>
       <Button>Join</Button>

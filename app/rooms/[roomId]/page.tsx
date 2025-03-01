@@ -1,5 +1,6 @@
 'use client'
 
+import { uniqBy } from 'lodash'
 import { redirect, useParams as useNextParams } from 'next/navigation'
 import { PostWithAuthor, db } from '@/app/db'
 import { Button } from '@/components/Button/Button'
@@ -11,10 +12,10 @@ import {
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
-import { uniqBy } from 'lodash'
+import { SignInPage } from '@/components/SignInPage/SignInPage'
 
 export default function Room() {
-  useAuth()
+  const auth = db.useAuth()
   const { roomId } = useParams()
   const { isHost, meeting, posts, profile, selectedProfileIds } = useData({
     roomId,
@@ -27,6 +28,7 @@ export default function Room() {
     profileId: profile?.id,
   })
 
+  if (auth.user === null) return <SignInPage />
   if (!profile || !meeting) return null
 
   const postsOfSelectedProfiles = posts.filter(post => {
@@ -118,10 +120,4 @@ function useParams() {
   }
 
   return params
-}
-
-function useAuth() {
-  const auth = db.useAuth()
-
-  if (auth.user === null) redirect('/')
 }
