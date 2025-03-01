@@ -7,6 +7,18 @@ export const db = init({
   schema,
 })
 
+export type Meeting = InstaQLEntity<AppSchema, 'meetings'>
 export type PostWithAuthor = InstaQLEntity<AppSchema, 'posts', { author: {} }>
 export type Profile = InstaQLEntity<AppSchema, 'profiles'>
-export type Stage = 'intro' | 'discussion' | 'feedback' | 'conclusion'
+
+export enum Stage {
+  Intro = 'intro',
+  Discussion = 'discussion',
+  Feedback = 'feedback',
+}
+
+export const stageLabels = {
+  [Stage.Intro]: 'Share',
+  [Stage.Discussion]: 'Vote',
+  [Stage.Feedback]: 'Discuss',
+}

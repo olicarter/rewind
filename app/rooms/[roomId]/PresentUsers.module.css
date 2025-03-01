@@ -39,7 +39,7 @@
 }
 
 .input:checked + .button {
-  background-color: var(--color-foreground);
+  background-color: var(--color-accent);
   color: var(--color-background);
 }
 
