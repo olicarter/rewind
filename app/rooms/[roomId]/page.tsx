@@ -2,6 +2,7 @@
 
 import { uniqBy } from 'lodash'
 import { redirect, useParams } from 'next/navigation'
+import { useMemo } from 'react'
 import { Meeting, PostWithAuthor, Stage, db, stageLabels } from '@/app/db'
 import { Button } from '@/components/Button/Button'
 import { SignInPage } from '@/components/SignInPage/SignInPage'
@@ -14,7 +15,6 @@ import {
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
-import { useMemo } from 'react'
 
 export default function Room() {
   const auth = db.useAuth()
@@ -35,7 +35,7 @@ export default function Room() {
   })
 
   const postsToDisplay = useMemo(() => {
-    if (!meeting) return []
+    if (!meeting?.stage) return []
 
     switch (meeting.stage) {
       case Stage.Intro:
