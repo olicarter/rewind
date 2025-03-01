@@ -14,6 +14,7 @@ import {
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
+import { useMemo } from 'react'
 
 export default function Room() {
   const auth = db.useAuth()
@@ -33,6 +34,24 @@ export default function Room() {
     profileId: profile?.id,
   })
 
+  const postsToDisplay = useMemo(() => {
+    if (!meeting) return []
+
+    switch (meeting.stage) {
+      case Stage.Intro:
+        return posts.filter(post => post.author?.id === profile?.id)
+      case Stage.Discussion:
+        return posts.filter(post => {
+          if (selectedProfileIds.length === 0) return true
+          return post.author && selectedProfileIds.includes(post.author.id)
+        })
+      case Stage.Feedback:
+        return []
+      default:
+        return []
+    }
+  }, [meeting?.stage, posts, profile?.id, selectedProfileIds])
+
   if (auth.user === null) return <SignInPage />
   if (!profile || !meeting) return null
 
@@ -40,20 +59,6 @@ export default function Room() {
     id: presentUser.profileId,
     name: presentUser.name,
   }))
-
-  const postsOfCurrentProfile = posts.filter(
-    post => post.author?.id === profile.id
-  )
-
-  const postsOfSelectedProfiles = posts.filter(post => {
-    if (selectedProfileIds.length === 0) return true
-    return post.author && selectedProfileIds.includes(post.author.id)
-  })
-
-  const postsToDisplay =
-    meeting.stage === Stage.Discussion
-      ? postsOfSelectedProfiles
-      : postsOfCurrentProfile
 
   return (
     <div className={styles.page}>
