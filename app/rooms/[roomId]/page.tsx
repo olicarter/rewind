@@ -61,7 +61,7 @@ export default function Room() {
           />
         </div>
         <Button onClick={() => db.auth.signOut()} type="button">
-          Sign out
+          Leave
         </Button>
       </header>
       <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
