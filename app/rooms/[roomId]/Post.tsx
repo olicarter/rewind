@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PostWithAuthor, Sentiment, db } from '@/app/db'
+import { PostWithAuthor, Sentiment, Stage, db } from '@/app/db'
 import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
@@ -11,6 +11,7 @@ import { SentimentLabel } from './SentimentInputs'
 
 export function Post(props: {
   meetingId: string
+  meetingStage: Stage
   post: PostWithAuthor
   profileId: string
 }) {
@@ -47,10 +48,17 @@ export function Post(props: {
       />
       <footer>
         <SentimentLabel sentiment={props.post.sentiment as Sentiment} />
-        <div>
-          {isAuthor && <Button onClick={() => setEditing(true)}>Edit</Button>}
-          <DeleteButton post={props.post} />
-        </div>
+        {props.meetingStage === Stage.Intro && (
+          <div>
+            {isAuthor && <Button onClick={() => setEditing(true)}>Edit</Button>}
+            <DeleteButton post={props.post} />
+          </div>
+        )}
+        {props.meetingStage === Stage.Discussion && (
+          <Button disabled type="button">
+            Vote
+          </Button>
+        )}
       </footer>
     </div>
   )

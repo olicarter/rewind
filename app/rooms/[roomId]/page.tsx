@@ -90,6 +90,7 @@ export default function Room() {
             <Post
               key={post.id}
               meetingId={meeting.id}
+              meetingStage={meeting.stage as Stage}
               post={post}
               profileId={profile.id}
             />
