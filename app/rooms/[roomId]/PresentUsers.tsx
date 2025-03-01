@@ -5,9 +5,11 @@ import { ChangeEvent, Fragment } from 'react'
 import { db, Profile } from '@/app/db'
 import { Button } from '@/components/Button'
 import styles from './PresentUsers.module.css'
+import { cn } from '@/utils'
 
 export interface PresentUsersProps {
   authors: Pick<Profile, 'id' | 'name'>[]
+  hostId: string | undefined
   isHost: boolean
   meetingId: string
   presentProfiles: Pick<Profile, 'id' | 'name'>[]
@@ -51,8 +53,17 @@ export function PresentUsers(props: PresentUsersProps) {
             readOnly={!props.isHost}
             type="checkbox"
           />
-          <Button asChild className={styles.button}>
-            <label htmlFor={profile.id}>{profile.name}</label>
+          <Button
+            asChild
+            className={cn(
+              styles.button,
+              props.hostId === profile.id && styles.host
+            )}
+          >
+            <label htmlFor={profile.id}>
+              {props.hostId === profile.id && <span>Host</span>}
+              {profile.name}
+            </label>
           </Button>
         </Fragment>
       ))}

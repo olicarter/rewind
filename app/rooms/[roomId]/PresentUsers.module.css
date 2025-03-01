@@ -3,23 +3,8 @@
   gap: 0.75rem;
 }
 
-.label {
-  align-items: center;
-  background-color: var(--color-layer);
-  border-radius: 0.375rem;
-  border: none;
-  color: var(--color-foreground);
-  cursor: pointer;
-  display: flex;
-  font-family: var(--font-geist-mono);
-  font-size: 0.875rem;
-  font-weight: 600;
-  height: 2rem;
-  justify-content: center;
-  padding: 0 0.625rem;
-  text-decoration: none;
-  user-select: none;
-  width: fit-content;
+.button.host span {
+  opacity: 0.5;
 }
 
 .button:hover {

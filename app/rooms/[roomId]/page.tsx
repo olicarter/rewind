@@ -17,7 +17,7 @@ import {
 export default function Room() {
   const auth = db.useAuth()
   const { roomId } = useParams()
-  const { authors, isHost, meeting, posts, profile, selectedProfileIds } =
+  const { authors, hostId, meeting, posts, profile, selectedProfileIds } =
     useData({
       roomId,
     })
@@ -51,7 +51,8 @@ export default function Room() {
           <hr className={styles.divider} />
           <PresentUsers
             authors={authors}
-            isHost={isHost}
+            hostId={hostId}
+            isHost={hostId === profile.id}
             meetingId={meeting.id}
             presentProfiles={presentProfiles}
             roomId={roomId}
@@ -61,11 +62,6 @@ export default function Room() {
           />
         </div>
         <div>
-          {isHost && (
-            <Button asChild className={styles.hostButton} disabled>
-              <label>Host</label>
-            </Button>
-          )}
           <Button onClick={() => db.auth.signOut()} type="button">
             Leave
           </Button>
@@ -110,12 +106,19 @@ function useData({ roomId }: { roomId: string }) {
   // InstantDB doesn't type the data correctly, so we need to cast it
   const posts: PostWithAuthor[] = meeting?.posts ?? []
   const authors = uniqBy(posts.map(post => post.author).filter(isDefined), 'id')
-  const isHost = meeting?.host?.id === profile?.id
+  const hostId = meeting?.host?.id
   const selectedProfileIds = parseSelectedProfileIds(
     meeting?.selectedProfileIds
   )
 
-  return { authors, isHost, meeting, posts, profile, selectedProfileIds }
+  return {
+    authors,
+    hostId,
+    meeting,
+    posts,
+    profile,
+    selectedProfileIds,
+  }
 }
 
 function useParams() {
