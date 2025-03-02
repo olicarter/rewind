@@ -33,7 +33,3 @@
   flex-grow: 1;
   gap: inherit;
 }
-
-.main > * {
-  flex-grow: 1;
-}
