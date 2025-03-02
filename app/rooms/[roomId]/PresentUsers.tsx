@@ -1,8 +1,9 @@
 'use client'
 
 import { uniqBy } from 'lodash'
-import { ChangeEvent, Fragment } from 'react'
+import { ChangeEvent } from 'react'
 import { db, Presence, Profile, Stage } from '@/app/db'
+import { CheckboxButton } from '@/components/CheckboxButton/CheckboxButton'
 import { useKeyDown } from '@/hooks/useKeyDown'
 import { cn } from '@/utils'
 import styles from './PresentUsers.module.css'
@@ -65,28 +66,21 @@ export function PresentUsers(props: PresentUsersProps) {
   return (
     <ul className={styles.presentUsers}>
       {allProfiles.map(profile => (
-        <Fragment key={profile.id}>
-          <input
-            checked={props.selectedProfileIds.includes(profile.id)}
-            className={styles.input}
-            id={profile.id}
-            onChange={event => toggleSelectedProfile(event, profile.id)}
-            readOnly={readOnly}
-            type="checkbox"
-          />
-          <label
-            className={cn(
-              'button',
-              styles.label,
-              props.hostId === profile.id && styles.host,
-              !profile.present && styles.offline
-            )}
-            htmlFor={profile.id}
-          >
-            {props.hostId === profile.id && <span>Host</span>}
-            {profile.name}
-          </label>
-        </Fragment>
+        <CheckboxButton
+          checked={props.selectedProfileIds.includes(profile.id)}
+          className={cn(
+            'medium',
+            styles.label,
+            props.hostId === profile.id && styles.host,
+            !profile.present && styles.offline
+          )}
+          key={profile.id}
+          onChange={event => toggleSelectedProfile(event, profile.id)}
+          readOnly={readOnly}
+        >
+          {props.hostId === profile.id && <span>Host</span>}
+          {profile.name}
+        </CheckboxButton>
       ))}
     </ul>
   )

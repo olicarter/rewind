@@ -5,10 +5,18 @@ import styles from './Button.module.css'
 
 interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
   asChild?: boolean
+  size?: 'small' | 'medium' | 'large'
 }
 
-export function Button({ asChild, className, ...props }: ButtonProps) {
+export function Button({
+  asChild,
+  className,
+  size = 'medium',
+  ...props
+}: ButtonProps) {
   const Comp = asChild ? Slot.Root : 'button'
 
-  return <Comp className={cn(styles.button, className)} {...props} />
+  return (
+    <Comp className={cn('button', size, styles.button, className)} {...props} />
+  )
 }

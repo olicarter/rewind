@@ -1,19 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { PostWithAuthor, Sentiment, Stage, db } from '@/app/db'
+import {
+  PostWithAuthor,
+  Profile,
+  Sentiment,
+  Stage,
+  db,
+  sentimentLabels,
+} from '@/app/db'
 import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
+import { RadioButton } from '@/components/RadioButton'
 import { TextArea } from '@/components/TextArea'
 import { CreatePostForm } from './CreatePostForm'
 import styles from './Post.module.css'
-import { SentimentLabel } from './SentimentInputs'
 
 export function Post(props: {
   meetingId: string
   meetingStage: Stage
   post: PostWithAuthor
-  profileId: string
+  profile: Profile
 }) {
   const [editing, setEditing] = useState(false)
 
@@ -24,19 +31,29 @@ export function Post(props: {
         onCancel={() => setEditing(false)}
         onSave={() => setEditing(false)}
         post={props.post}
-        profileId={props.profileId}
+        profile={props.profile}
       />
     )
   }
 
-  const isAuthor = props.post?.author?.id === props.profileId
+  const isAuthor = props.post?.author?.id === props.profile.id
 
   return (
     <div className={styles.post}>
       {props.post && (
         <header className={styles.header}>
-          <Avatar name={props.post.author?.name ?? ''} size="small" />
-          <h4 className={styles.heading}>{props.post.author?.name}</h4>
+          <div>
+            <Avatar name={props.post.author?.name ?? ''} size="medium" />
+            <h4 className={styles.heading}>{props.post.author?.name}</h4>
+          </div>
+          <RadioButton
+            className={props.post.sentiment.toLowerCase()}
+            readOnly
+            size="small"
+            value={props.post.sentiment}
+          >
+            {sentimentLabels[props.post.sentiment as Sentiment]}
+          </RadioButton>
         </header>
       )}
       <TextArea
@@ -46,20 +63,24 @@ export function Post(props: {
         tabIndex={!props.post ? 0 : -1}
         value={props.post?.content}
       />
-      <footer>
-        <SentimentLabel sentiment={props.post.sentiment as Sentiment} />
-        {props.meetingStage === Stage.Intro && (
-          <div>
-            {isAuthor && <Button onClick={() => setEditing(true)}>Edit</Button>}
-            <DeleteButton post={props.post} />
-          </div>
-        )}
-        {props.meetingStage === Stage.Discussion && (
-          <Button disabled type="button">
-            Vote
-          </Button>
-        )}
-      </footer>
+      {[Stage.Intro, Stage.Discussion].includes(props.meetingStage) && (
+        <footer>
+          <div />
+          {props.meetingStage === Stage.Intro && (
+            <div>
+              {isAuthor && (
+                <Button onClick={() => setEditing(true)}>Edit</Button>
+              )}
+              <DeleteButton post={props.post} />
+            </div>
+          )}
+          {props.meetingStage === Stage.Discussion && (
+            <Button disabled type="button">
+              Vote
+            </Button>
+          )}
+        </footer>
+      )}
     </div>
   )
 }

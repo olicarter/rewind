@@ -3,7 +3,7 @@
 import { uniqBy } from 'lodash'
 import { redirect, useParams } from 'next/navigation'
 import { useMemo } from 'react'
-import { Meeting, PostWithAuthor, Stage, db, stageLabels } from '@/app/db'
+import { PostWithAuthor, Stage, db, stageLabels } from '@/app/db'
 import { Button } from '@/components/Button/Button'
 import { SignInPage } from '@/components/SignInPage/SignInPage'
 import { isEveryCharUppercase, isDefined, cn } from '@/utils'
@@ -47,6 +47,8 @@ export default function Room() {
     switch (meeting.stage) {
       case Stage.Intro:
         return posts.filter(post => post.author?.id === profile?.id)
+      case Stage.Group:
+        return posts
       case Stage.Discussion:
         return posts.filter(post => {
           if (selectedProfileIds.length === 0) return true
@@ -94,7 +96,7 @@ export default function Room() {
       </header>
       <main className={styles.main}>
         {meeting.stage === Stage.Intro && (
-          <CreatePostForm meetingId={meeting.id} profileId={profile.id} />
+          <CreatePostForm meetingId={meeting.id} profile={profile} />
         )}
         <ul className={styles.posts}>
           {postsToDisplay.map(post => (
@@ -103,7 +105,7 @@ export default function Room() {
               meetingId={meeting.id}
               meetingStage={meeting.stage as Stage}
               post={post}
-              profileId={profile.id}
+              profile={profile}
             />
           ))}
         </ul>

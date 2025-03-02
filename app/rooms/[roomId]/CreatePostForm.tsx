@@ -6,7 +6,7 @@ import { debounce } from 'lodash'
 import { ChangeEvent, useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { PostWithAuthor, Sentiment, db } from '@/app/db'
+import { PostWithAuthor, Profile, Sentiment, db } from '@/app/db'
 import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
@@ -27,7 +27,7 @@ export function CreatePostForm(props: {
   onCancel?: () => void
   onSave?: () => void
   post?: PostWithAuthor
-  profileId: string
+  profile: Pick<Profile, 'id' | 'name'>
 }) {
   const form = useForm<CreatePostFormData>({
     defaultValues: {
@@ -64,7 +64,7 @@ export function CreatePostForm(props: {
   }, [getFieldState, sentiment.result, setValue])
 
   // Check if the current user is the author of the post.
-  const isAuthor = props.post?.author?.id === props.profileId
+  const isAuthor = props.post?.author?.id === props.profile.id
 
   // Create or update a post.
   async function createOrUpdatePost(data: CreatePostFormData) {
@@ -78,7 +78,7 @@ export function CreatePostForm(props: {
         ? []
         : [
             db.tx.posts[postId].link({
-              author: props.profileId,
+              author: props.profile.id,
               // @ts-expect-error InstantDB typing is incorrect
               meeting: props.meetingId,
             }),
@@ -104,12 +104,14 @@ export function CreatePostForm(props: {
         }}
         onSubmit={handleSubmit(createOrUpdatePost)}
       >
-        {props.post && (
-          <header className={styles.header}>
-            <Avatar name={props.post.author?.name ?? ''} size="small" />
-            <h4 className={styles.heading}>{props.post.author?.name}</h4>
-          </header>
-        )}
+        <header className={styles.header}>
+          <div>
+            <Avatar name={props.profile.name} size="medium" />
+            <h4 className={styles.heading}>{props.profile.name}</h4>
+          </div>
+          {props.post && <SentimentInputs size="small" />}
+        </header>
+
         <TextArea
           {...register('content', {
             onChange: (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -128,7 +130,7 @@ export function CreatePostForm(props: {
           tabIndex={!props.post ? 0 : -1}
         />
         <footer>
-          <SentimentInputs />
+          {props.post ? <div /> : <SentimentInputs size="medium" />}
           {props.post ? (
             <div>
               <Button>Save</Button>

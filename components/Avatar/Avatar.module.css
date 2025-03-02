@@ -19,8 +19,8 @@
 }
 
 .root.medium {
-  height: 2rem;
-  width: 2rem;
+  height: var(--button-height-small);
+  width: var(--button-height-small);
 }
 
 .root.large {

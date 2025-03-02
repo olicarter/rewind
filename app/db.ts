@@ -30,14 +30,22 @@ export enum Sentiment {
   NEGATIVE = 'NEGATIVE',
 }
 
+export const sentimentLabels: Record<Sentiment, string> = {
+  [Sentiment.POSITIVE]: 'Good',
+  [Sentiment.NEGATIVE]: 'Bad',
+  [Sentiment.NEUTRAL]: 'Mixed',
+}
+
 export enum Stage {
   Intro = 'intro',
+  Group = 'group',
   Discussion = 'discussion',
   Feedback = 'feedback',
 }
 
-export const stageLabels = {
+export const stageLabels: Record<Stage, string> = {
   [Stage.Intro]: 'Share',
+  [Stage.Group]: 'Group',
   [Stage.Discussion]: 'Vote',
   [Stage.Feedback]: 'Discuss',
 }

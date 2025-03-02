@@ -4,7 +4,7 @@
   border-radius: 0.375rem;
   color: white;
   cursor: text;
-  height: 2rem;
+  height: var(--button-height-small);
   padding: 0 0.75rem;
   width: fit-content;
 }

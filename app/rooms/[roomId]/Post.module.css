@@ -12,7 +12,13 @@
   align-items: center;
   display: flex;
   gap: 0.5rem;
-  justify-content: flex-start;
+  justify-content: space-between;
+}
+
+.header > div {
+  align-items: center;
+  display: flex;
+  gap: inherit;
 }
 
 .heading {
