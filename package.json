@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/eslint-plugin-next": "^15.2.0",
     "@types/lodash": "^4.17.15",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -32,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "typescript": "^5"
   },
   "prettier": {
