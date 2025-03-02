@@ -1,23 +1,20 @@
 'use client'
 
-import { DndContext } from '@dnd-kit/core'
-import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { uniqBy } from 'lodash'
 import { redirect, useParams } from 'next/navigation'
-import { useMemo } from 'react'
-import { PostWithAuthor, Stage, db, stageLabels } from '@/app/db'
+import { PostWithAuthor, Stage, db } from '@/app/db'
 import { Button } from '@/components/Button/Button'
 import { SignInPage } from '@/components/SignInPage/SignInPage'
-import { isEveryCharUppercase, isDefined, cn } from '@/utils'
+import { isEveryCharUppercase, isDefined } from '@/utils'
 import { CreatePostForm } from './CreatePostForm'
 import styles from './page.module.css'
-import { Post } from './Post'
+import { Posts } from './Posts'
 import {
   PresentUsers,
   getPresentUsers,
   parseSelectedProfileIds,
 } from './PresentUsers'
-
+import { Stages } from './Stages'
 export default function Room() {
   const auth = db.useAuth()
   const { roomId } = useParams<{ roomId: string }>()
@@ -42,24 +39,6 @@ export default function Room() {
     name: profile?.name,
     profileId: profile?.id,
   })
-
-  const postsToDisplay = useMemo(() => {
-    if (!meeting?.stage) return []
-
-    switch (meeting.stage) {
-      case Stage.Intro:
-        return posts.filter(post => post.author?.id === profile?.id)
-      case Stage.Group:
-        return posts
-      case Stage.Discussion:
-        return posts.filter(post => {
-          if (selectedProfileIds.length === 0) return true
-          return post.author && selectedProfileIds.includes(post.author.id)
-        })
-      default:
-        return []
-    }
-  }, [meeting?.stage, posts, profile?.id, selectedProfileIds])
 
   if (auth.user === null) return <SignInPage />
   if (!profile || !meeting) return null
@@ -98,19 +77,12 @@ export default function Room() {
         {meeting.stage === Stage.Intro && (
           <CreatePostForm meetingId={meeting.id} profile={profile} />
         )}
-        <DndContext modifiers={[restrictToWindowEdges]}>
-          <ul className={styles.posts}>
-            {postsToDisplay.map(post => (
-              <Post
-                key={post.id}
-                meetingId={meeting.id}
-                meetingStage={meeting.stage as Stage}
-                post={post}
-                profile={profile}
-              />
-            ))}
-          </ul>
-        </DndContext>
+        <Posts
+          meeting={meeting}
+          posts={posts}
+          profile={profile}
+          selectedProfileIds={selectedProfileIds}
+        />
       </main>
     </div>
   )
@@ -154,38 +126,4 @@ function useData({ roomId }: { roomId: string }) {
     profile,
     selectedProfileIds,
   }
-}
-
-function Stages(props: {
-  isHost: boolean
-  meetingId: string
-  meetingStage: Stage
-}) {
-  async function setStage(stage: Stage) {
-    if (!props.isHost) return
-    db.transact([
-      db.tx.meetings[props.meetingId].update({
-        selectedProfileIds: JSON.stringify([]),
-        stage,
-      }),
-    ])
-  }
-
-  return (
-    <ol className={styles.stages}>
-      {Object.values(Stage).map(stage => (
-        <li
-          className={cn(
-            styles.stage,
-            props.meetingStage === stage && styles.active
-          )}
-          key={stage}
-        >
-          <Button disabled={!props.isHost} onClick={() => setStage(stage)}>
-            {stageLabels[stage]}
-          </Button>
-        </li>
-      ))}
-    </ol>
-  )
 }
