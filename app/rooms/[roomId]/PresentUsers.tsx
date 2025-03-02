@@ -61,7 +61,9 @@ export function PresentUsers(props: PresentUsersProps) {
     return a.name.localeCompare(b.name)
   })
 
-  const readOnly = !props.isHost || props.meetingStage !== Stage.Discussion
+  const readOnly =
+    !props.isHost ||
+    ![Stage.Group, Stage.Discussion].includes(props.meetingStage)
 
   return (
     <ul className={styles.presentUsers}>

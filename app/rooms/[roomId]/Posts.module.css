@@ -9,17 +9,13 @@
 }
 
 .group {
+  background-color: var(--color-layer-2);
+  border-radius: 0.75rem;
   display: grid;
   gap: inherit;
   grid-auto-rows: max-content;
   list-style: none;
   margin: 0;
-  padding: 0;
-}
-
-.group.hasMultiplePosts {
-  background-color: var(--color-layer-2);
-  border-radius: 0.75rem;
   padding: 0.75rem;
 }
 
@@ -45,4 +41,8 @@
 
 .groupName[readonly] {
   background-color: transparent;
+}
+
+.voteButton:hover:enabled {
+  background-color: var(--color-layer-3);
 }

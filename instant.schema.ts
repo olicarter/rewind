@@ -15,6 +15,8 @@ const _schema = i.schema({
     groups: i.entity({
       createdAt: i.date(),
       name: i.string(),
+      // JSON serialized array of profile IDs
+      votedBy: i.string(),
     }),
     posts: i.entity({
       content: i.string(),

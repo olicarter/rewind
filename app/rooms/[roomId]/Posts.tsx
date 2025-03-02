@@ -14,7 +14,6 @@ import {
 } from '@/app/db'
 import { Button } from '@/components/Button'
 import { TextInput } from '@/components/TextInput'
-import { cn } from '@/utils'
 import { Post } from './Post'
 import styles from './Posts.module.css'
 
@@ -33,7 +32,6 @@ export function Posts(props: PostsProps) {
       case Stage.Intro:
         return props.posts.filter(post => post.author?.id === props.profile?.id)
       case Stage.Group:
-        return props.posts
       case Stage.Discussion:
         if (props.selectedProfileIds.length === 0) return props.posts
         return props.posts.filter(post => {
@@ -72,9 +70,11 @@ export function Posts(props: PostsProps) {
             const remainingPostsInGroup = props.posts.filter(
               post => post.group?.id === dragGroupId && post.id !== dragPostId
             )
-            if (remainingPostsInGroup.length < 2) {
+            if (remainingPostsInGroup.length === 1) {
+              const remainingPost = remainingPostsInGroup.at(0)
+              if (!remainingPost) return
               actions.push(
-                db.tx.posts[remainingPostsInGroup[0].id].unlink({
+                db.tx.posts[remainingPost.id].unlink({
                   group: dragGroupId,
                 })
               )
@@ -101,7 +101,7 @@ export function Posts(props: PostsProps) {
       >
         <GroupPostsList
           meeting={props.meeting}
-          posts={props.posts}
+          posts={postsToDisplay}
           profile={props.profile}
         />
       </DndContext>
@@ -195,6 +195,18 @@ function Group(props: GroupProps) {
     post => post.id === droppable.active?.id
   )
 
+  async function toggleVote() {
+    const votedBy = new Set<string>(JSON.parse(props.group.votedBy ?? '[]'))
+    const newVotedBy = votedBy.has(props.profile.id)
+      ? Array.from(votedBy).filter(id => id !== props.profile.id)
+      : [...votedBy, props.profile.id]
+    await db.transact([
+      db.tx.groups[props.group.id].update({
+        votedBy: JSON.stringify(newVotedBy),
+      }),
+    ])
+  }
+
   async function updateGroupName(event: ChangeEvent<HTMLInputElement>) {
     const name = event.target.value
     await db.transact([db.tx.groups[props.group.id].update({ name })])
@@ -202,10 +214,7 @@ function Group(props: GroupProps) {
 
   return (
     <li
-      className={cn(
-        styles.group,
-        props.posts.length > 1 && styles.hasMultiplePosts
-      )}
+      className={styles.group}
       id={id}
       ref={droppable.setNodeRef}
       style={{
@@ -220,7 +229,15 @@ function Group(props: GroupProps) {
           readOnly={props.meeting.stage !== Stage.Group}
         />
         {props.meeting.stage === Stage.Discussion && (
-          <Button type="button">Vote</Button>
+          <Button
+            className={styles.voteButton}
+            onClick={toggleVote}
+            type="button"
+          >
+            {props.group.votedBy?.includes(props.profile.id)
+              ? 'Unvote'
+              : 'Vote'}
+          </Button>
         )}
       </header>
       <ul>
