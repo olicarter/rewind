@@ -4,11 +4,27 @@
   border-radius: 0.375rem;
   color: white;
   cursor: text;
-  height: var(--button-height-small);
+  outline: none;
   padding: 0 0.75rem;
   width: fit-content;
 }
 
-.input:focus-visible {
+.input[readonly] {
+  cursor: default;
+}
+
+.input:not([readonly]):focus-visible {
   outline: 2px solid white;
+}
+
+.input.small {
+  height: var(--button-height-small);
+}
+
+.input.medium {
+  height: var(--button-height-medium);
+}
+
+.input.large {
+  height: var(--button-height-large);
 }

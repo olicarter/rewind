@@ -7,9 +7,18 @@ export const db = init({
   schema,
 })
 
-export type Meeting = InstaQLEntity<AppSchema, 'meetings'>
+export interface Meeting
+  extends InstaQLEntity<AppSchema, 'meetings', { host: {}; posts: {} }> {
+  stage: Stage
+}
 
-export type PostWithAuthor = InstaQLEntity<AppSchema, 'posts', { author: {} }>
+export type Group = InstaQLEntity<AppSchema, 'groups'>
+
+export type PostWithAuthor = InstaQLEntity<
+  AppSchema,
+  'posts',
+  { author: {}; group: {} }
+>
 
 export type Profile = InstaQLEntity<AppSchema, 'profiles'>
 

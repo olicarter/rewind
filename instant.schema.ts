@@ -12,10 +12,13 @@ const _schema = i.schema({
     $users: i.entity({
       email: i.string().unique().indexed(),
     }),
+    groups: i.entity({
+      createdAt: i.date(),
+      name: i.string(),
+    }),
     posts: i.entity({
       content: i.string(),
       createdAt: i.date(),
-      groupId: i.string(),
       sentiment: i.string(),
     }),
     profiles: i.entity({
@@ -77,6 +80,18 @@ const _schema = i.schema({
         on: 'profiles',
         has: 'many',
         label: 'authoredPosts',
+      },
+    },
+    postsGroup: {
+      forward: {
+        on: 'posts',
+        has: 'one',
+        label: 'group',
+      },
+      reverse: {
+        on: 'groups',
+        has: 'many',
+        label: 'posts',
       },
     },
     profiles$user: {

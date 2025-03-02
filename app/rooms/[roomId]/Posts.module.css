@@ -30,3 +30,19 @@
   margin: 0;
   padding: 0;
 }
+
+.group .header {
+  align-items: center;
+  display: flex;
+  gap: inherit;
+  height: var(--button-height-medium);
+  justify-content: space-between;
+}
+
+.groupName {
+  width: 100%;
+}
+
+.groupName[readonly] {
+  background-color: transparent;
+}

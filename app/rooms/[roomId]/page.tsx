@@ -2,7 +2,7 @@
 
 import { uniqBy } from 'lodash'
 import { redirect, useParams } from 'next/navigation'
-import { PostWithAuthor, Stage, db } from '@/app/db'
+import { Meeting, PostWithAuthor, Stage, db } from '@/app/db'
 import { Button } from '@/components/Button/Button'
 import { SignInPage } from '@/components/SignInPage/SignInPage'
 import { isEveryCharUppercase, isDefined } from '@/utils'
@@ -55,7 +55,7 @@ export default function Room() {
           <Stages
             isHost={isHost}
             meetingId={meeting.id}
-            meetingStage={meeting.stage as Stage}
+            meetingStage={meeting.stage}
           />
           <hr className={styles.divider} />
           <PresentUsers
@@ -63,7 +63,7 @@ export default function Room() {
             hostId={hostId}
             isHost={isHost}
             meetingId={meeting.id}
-            meetingStage={meeting.stage as Stage}
+            meetingStage={meeting.stage}
             presentProfiles={presentProfiles}
             roomId={roomId}
             selectedProfileIds={selectedProfileIds}
@@ -97,7 +97,7 @@ function useData({ roomId }: { roomId: string }) {
           meetings: {
             $: { where: { roomId } },
             host: {},
-            posts: { author: {} },
+            posts: { author: {}, group: {} },
             profiles: {},
           },
           profiles: {
@@ -108,7 +108,7 @@ function useData({ roomId }: { roomId: string }) {
   )
 
   const profile = data?.profiles.at(0)
-  const meeting = data?.meetings.at(0)
+  const meeting = data?.meetings.at(0) as Meeting
   // InstantDB doesn't type the data correctly, so we need to cast it
   const posts: PostWithAuthor[] = meeting?.posts ?? []
   const authors = uniqBy(posts.map(post => post.author).filter(isDefined), 'id')

@@ -24,8 +24,14 @@ export function Post(props: {
   post: PostWithAuthor
   profile: Profile
 }) {
-  const droppable = useDroppable({ id: props.post.id, data: { type: 'post' } })
-  const draggable = useDraggable({ id: props.post.id })
+  const droppable = useDroppable({
+    id: props.post.id,
+    data: { type: 'post' },
+  })
+  const draggable = useDraggable({
+    id: props.post.id,
+    data: { groupId: props.post.group?.id },
+  })
 
   const [editing, setEditing] = useState(false)
 
@@ -51,7 +57,7 @@ export function Post(props: {
       )}
       ref={element => {
         draggable.setNodeRef(element)
-        if (!props.post.groupId) {
+        if (!props.post.group?.id) {
           droppable.setNodeRef(element)
         }
       }}
@@ -94,7 +100,7 @@ export function Post(props: {
         tabIndex={!props.post ? 0 : -1}
         value={props.post?.content}
       />
-      {[Stage.Intro, Stage.Discussion].includes(props.meetingStage) && (
+      {[Stage.Intro].includes(props.meetingStage) && (
         <footer>
           <div />
           {props.meetingStage === Stage.Intro && (
@@ -104,11 +110,6 @@ export function Post(props: {
               )}
               <DeleteButton post={props.post} />
             </div>
-          )}
-          {props.meetingStage === Stage.Discussion && (
-            <Button disabled type="button">
-              Vote
-            </Button>
           )}
         </footer>
       )}
