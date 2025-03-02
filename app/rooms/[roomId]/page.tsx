@@ -80,7 +80,7 @@ export default function Room() {
           />
           <hr className={styles.divider} />
           <PresentUsers
-            authors={meeting.stage === Stage.Discussion ? authors : []}
+            authors={authors}
             hostId={hostId}
             isHost={isHost}
             meetingId={meeting.id}

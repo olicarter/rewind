@@ -7,7 +7,7 @@
   opacity: 0.5;
 }
 
-.label.offline:has(input:not(:checked)):not(:hover) {
+.label.offline:has(input:not(:checked)) {
   opacity: 0.5;
 }
 
