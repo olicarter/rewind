@@ -15,6 +15,7 @@ const _schema = i.schema({
     posts: i.entity({
       content: i.string(),
       createdAt: i.date(),
+      groupId: i.string(),
       sentiment: i.string(),
     }),
     profiles: i.entity({

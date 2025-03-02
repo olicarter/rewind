@@ -1,7 +1,9 @@
-import { DndContext } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, useDroppable } from '@dnd-kit/core'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
-import { useMemo } from 'react'
-import { Meeting, PostWithAuthor, Profile, Stage } from '@/app/db'
+import { groupBy } from 'lodash'
+import { useMemo, useState } from 'react'
+import { db, Meeting, PostWithAuthor, Profile, Stage } from '@/app/db'
+import { cn } from '@/utils'
 import { Post } from './Post'
 import styles from './Posts.module.css'
 
@@ -38,10 +40,135 @@ export function Posts(props: PostsProps) {
     props.selectedProfileIds,
   ])
 
+  if (props.meeting.stage === Stage.Group) {
+    return (
+      <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
+        <GroupPostsList
+          meeting={props.meeting}
+          posts={props.posts}
+          profile={props.profile}
+        />
+      </DndContext>
+    )
+  }
+
   return (
-    <DndContext modifiers={[restrictToWindowEdges]}>
-      <ul className={styles.posts}>
-        {postsToDisplay.map(post => (
+    <ul className={styles.posts}>
+      {postsToDisplay.map(post => (
+        <Post
+          key={post.id}
+          meetingId={props.meeting.id}
+          meetingStage={props.meeting.stage as Stage}
+          post={post}
+          profile={props.profile}
+        />
+      ))}
+    </ul>
+  )
+}
+
+function handleDragEnd(event: DragEndEvent) {
+  const dragPostId = event.active.id
+  const dropType = event.over?.data.current?.type
+  const dropId = event.over?.id.toString()
+
+  // If the post is being dropped on itself, do nothing
+  if (!dropId || dragPostId === dropId) return
+
+  // If the post is being dropped on the background, remove it from any group
+  if (dropType === 'posts') {
+    db.transact([db.tx.posts[dragPostId].update({ groupId: undefined })])
+  }
+
+  // If the post is being dropped on a post, create a new group and add both posts to it
+  if (dropType === 'post') {
+    const randomString = `Foo ${Math.random()}`
+    db.transact([
+      db.tx.posts[dragPostId].update({ groupId: randomString }),
+      db.tx.posts[dropId].update({ groupId: randomString }),
+    ])
+  }
+
+  // If the post is being dropped on a group, add the post to the group
+  if (dropType === 'group') {
+    db.transact([db.tx.posts[dragPostId].update({ groupId: dropId })])
+  }
+}
+
+interface GroupPostsListProps {
+  meeting: Meeting
+  posts: PostWithAuthor[]
+  profile: Profile
+}
+
+function GroupPostsList(props: GroupPostsListProps) {
+  const droppable = useDroppable({ id: 'posts', data: { type: 'posts' } })
+
+  const groupedPostsByGroupId = useMemo(() => {
+    const postsWithGroup = props.posts.filter(post => !!post.groupId)
+    return groupBy(postsWithGroup, 'groupId')
+  }, [props.posts])
+
+  const ungroupedPosts = useMemo(() => {
+    return props.posts.filter(post => !post.groupId)
+  }, [props.posts])
+
+  return (
+    <ul className={styles.posts} ref={droppable.setNodeRef}>
+      {Object.entries(groupedPostsByGroupId).map(([groupId, posts]) => (
+        <Group
+          groupId={groupId}
+          key={groupId}
+          meeting={props.meeting}
+          posts={posts}
+          profile={props.profile}
+        />
+      ))}
+      {ungroupedPosts.map(post => (
+        <Post
+          key={post.id}
+          meetingId={props.meeting.id}
+          meetingStage={props.meeting.stage as Stage}
+          post={post}
+          profile={props.profile}
+        />
+      ))}
+    </ul>
+  )
+}
+
+interface GroupProps {
+  groupId?: string
+  meeting: Meeting
+  posts: PostWithAuthor[]
+  profile: Profile
+}
+
+function Group(props: GroupProps) {
+  const [uuid] = useState(() => crypto.randomUUID())
+  const id = props.groupId || uuid
+
+  const droppable = useDroppable({ id, data: { type: 'group' } })
+
+  const isDraggingPostInGroup = props.posts.some(
+    post => post.id === droppable.active?.id
+  )
+
+  return (
+    <li
+      className={cn(
+        styles.group,
+        props.posts.length > 1 && styles.hasMultiplePosts
+      )}
+      id={id}
+      ref={droppable.setNodeRef}
+      style={{
+        opacity: droppable.isOver && !isDraggingPostInGroup ? 0.5 : 1,
+      }}
+    >
+      {props.posts.length > 1 && <span>{id}</span>}
+      <ul>
+        {props.posts.map(post => (
           <Post
             key={post.id}
             meetingId={props.meeting.id}
@@ -51,6 +178,6 @@ export function Posts(props: PostsProps) {
           />
         ))}
       </ul>
-    </DndContext>
+    </li>
   )
 }

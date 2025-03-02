@@ -1,5 +1,30 @@
 .posts {
+  align-items: start;
   display: grid;
   gap: inherit;
+  grid-auto-rows: max-content;
   grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
+}
+
+.group {
+  display: grid;
+  gap: inherit;
+  grid-auto-rows: max-content;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group.hasMultiplePosts {
+  background-color: var(--color-layer-2);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.group ul {
+  display: grid;
+  gap: inherit;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }

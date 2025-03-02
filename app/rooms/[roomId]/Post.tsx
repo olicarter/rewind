@@ -24,12 +24,8 @@ export function Post(props: {
   post: PostWithAuthor
   profile: Profile
 }) {
-  const droppable = useDroppable({
-    id: `droppable-${props.post.id}`,
-  })
-  const draggable = useDraggable({
-    id: `draggable-${props.post.id}`,
-  })
+  const droppable = useDroppable({ id: props.post.id, data: { type: 'post' } })
+  const draggable = useDraggable({ id: props.post.id })
 
   const [editing, setEditing] = useState(false)
 
@@ -54,17 +50,15 @@ export function Post(props: {
         props.meetingStage === Stage.Group && styles.draggable
       )}
       ref={element => {
-        if (props.meetingStage === Stage.Group) {
-          draggable.setNodeRef(element)
-          if (!draggable.isDragging) {
-            droppable.setNodeRef(element)
-          }
+        draggable.setNodeRef(element)
+        if (!props.post.groupId) {
+          droppable.setNodeRef(element)
         }
       }}
       style={
         props.meetingStage === Stage.Group
           ? {
-              opacity: droppable.isOver ? 0.5 : 1,
+              opacity: droppable.isOver && !draggable.isDragging ? 0.5 : 1,
               transform: draggable.transform
                 ? `translate3d(${draggable.transform.x}px, ${draggable.transform.y}px, 0)`
                 : undefined,
