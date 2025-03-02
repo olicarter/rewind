@@ -64,13 +64,26 @@ export function Posts(props: PostsProps) {
 
           // If the post is being dropped on the background, remove it from any group
           if (dropType === 'posts' && dragGroupId) {
+            // Don't do anything if the group has only one post
+            if (
+              props.posts.filter(post => post.group?.id === dragGroupId)
+                .length === 1
+            ) {
+              return
+            }
+
+            // Create a new group and add the post to it
+            const newGroupId = id()
             await db.transact([
               db.tx.posts[dragPostId].unlink({ group: dragGroupId }),
+              db.tx.groups[newGroupId].update({ name: 'Group' }),
+              db.tx.posts[dragPostId].link({ group: newGroupId }),
             ])
-            const remainingPostsInGroup = props.posts.filter(
-              post => post.group?.id === dragGroupId && post.id !== dragPostId
-            )
-            if (!remainingPostsInGroup.length) {
+
+            // If the group is now empty, delete it
+            if (
+              !props.posts.filter(post => post.group?.id === dragGroupId).length
+            ) {
               await db.transact([db.tx.groups[dragGroupId].delete()])
             }
           }
@@ -87,7 +100,13 @@ export function Posts(props: PostsProps) {
 
           // If the post is being dropped on a group, add the post to the group
           if (dropType === 'group') {
-            db.transact([db.tx.posts[dragPostId].link({ group: dropId })])
+            db.transact([
+              ...(props.posts.filter(post => post.group?.id === dragGroupId)
+                .length === 1
+                ? [db.tx.groups[dragGroupId].delete()]
+                : []),
+              db.tx.posts[dragPostId].link({ group: dropId }),
+            ])
           }
         }}
       >
