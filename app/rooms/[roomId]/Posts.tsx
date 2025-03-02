@@ -1,6 +1,7 @@
 import { DndContext, DragEndEvent, useDroppable } from '@dnd-kit/core'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { groupBy } from 'lodash'
+import { registerMasonry } from 'masonry-pf'
 import { useMemo, useState } from 'react'
 import { db, Meeting, PostWithAuthor, Profile, Stage } from '@/app/db'
 import { cn } from '@/utils'
@@ -53,7 +54,7 @@ export function Posts(props: PostsProps) {
   }
 
   return (
-    <ul className={styles.posts}>
+    <ul className={styles.posts} ref={registerMasonry}>
       {postsToDisplay.map(post => (
         <Post
           key={post.id}
@@ -114,7 +115,13 @@ function GroupPostsList(props: GroupPostsListProps) {
   }, [props.posts])
 
   return (
-    <ul className={styles.posts} ref={droppable.setNodeRef}>
+    <ul
+      className={styles.posts}
+      ref={element => {
+        droppable.setNodeRef(element)
+        if (!droppable.active) registerMasonry(element)
+      }}
+    >
       {Object.entries(groupedPostsByGroupId).map(([groupId, posts]) => (
         <Group
           groupId={groupId}
@@ -166,7 +173,6 @@ function Group(props: GroupProps) {
         opacity: droppable.isOver && !isDraggingPostInGroup ? 0.5 : 1,
       }}
     >
-      {props.posts.length > 1 && <span>{id}</span>}
       <ul>
         {props.posts.map(post => (
           <Post
