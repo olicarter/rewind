@@ -53,7 +53,7 @@ export function Posts(props: PostsProps) {
     return (
       <DndContext
         modifiers={[restrictToWindowEdges]}
-        onDragEnd={event => {
+        onDragEnd={async event => {
           const dragPostId = event.active.id
           const dragGroupId = event.active.data.current?.groupId
           const dropType = event.over?.data.current?.type
@@ -64,9 +64,15 @@ export function Posts(props: PostsProps) {
 
           // If the post is being dropped on the background, remove it from any group
           if (dropType === 'posts' && dragGroupId) {
-            db.transact([
+            await db.transact([
               db.tx.posts[dragPostId].unlink({ group: dragGroupId }),
             ])
+            const remainingPostsInGroup = props.posts.filter(
+              post => post.group?.id === dragGroupId && post.id !== dragPostId
+            )
+            if (!remainingPostsInGroup.length) {
+              await db.transact([db.tx.groups[dragGroupId].delete()])
+            }
           }
 
           // If the post is being dropped on a post, create a new group and add both posts to it
