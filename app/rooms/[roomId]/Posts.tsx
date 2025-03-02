@@ -22,8 +22,8 @@ export function Posts(props: PostsProps) {
       case Stage.Group:
         return props.posts
       case Stage.Discussion:
+        if (props.selectedProfileIds.length === 0) return props.posts
         return props.posts.filter(post => {
-          if (props.selectedProfileIds.length === 0) return true
           return (
             post.author && props.selectedProfileIds.includes(post.author.id)
           )
