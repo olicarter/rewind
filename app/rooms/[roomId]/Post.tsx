@@ -1,5 +1,6 @@
 'use client'
 
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { useState } from 'react'
 import {
   PostWithAuthor,
@@ -13,6 +14,7 @@ import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { RadioButton } from '@/components/RadioButton'
 import { TextArea } from '@/components/TextArea'
+import { cn } from '@/utils'
 import { CreatePostForm } from './CreatePostForm'
 import styles from './Post.module.css'
 
@@ -22,6 +24,13 @@ export function Post(props: {
   post: PostWithAuthor
   profile: Profile
 }) {
+  const droppable = useDroppable({
+    id: `droppable-${props.post.id}`,
+  })
+  const draggable = useDraggable({
+    id: `draggable-${props.post.id}`,
+  })
+
   const [editing, setEditing] = useState(false)
 
   if (editing) {
@@ -39,7 +48,35 @@ export function Post(props: {
   const isAuthor = props.post?.author?.id === props.profile.id
 
   return (
-    <div className={styles.post}>
+    <div
+      className={cn(
+        styles.post,
+        props.meetingStage === Stage.Group && styles.draggable
+      )}
+      ref={element => {
+        if (props.meetingStage === Stage.Group) {
+          draggable.setNodeRef(element)
+          if (!draggable.isDragging) {
+            droppable.setNodeRef(element)
+          }
+        }
+      }}
+      style={
+        props.meetingStage === Stage.Group
+          ? {
+              opacity: droppable.isOver ? 0.5 : 1,
+              transform: draggable.transform
+                ? `translate3d(${draggable.transform.x}px, ${draggable.transform.y}px, 0)`
+                : undefined,
+              zIndex: draggable.isDragging ? 1000 : undefined,
+            }
+          : undefined
+      }
+      {...(props.meetingStage === Stage.Group && {
+        ...draggable.listeners,
+        ...draggable.attributes,
+      })}
+    >
       {props.post && (
         <header className={styles.header}>
           <div>

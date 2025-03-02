@@ -18,5 +18,5 @@
 }
 
 .textArea[readonly] {
-  cursor: default;
+  cursor: unset;
 }

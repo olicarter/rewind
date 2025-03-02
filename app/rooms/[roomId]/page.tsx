@@ -1,5 +1,7 @@
 'use client'
 
+import { DndContext } from '@dnd-kit/core'
+import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { uniqBy } from 'lodash'
 import { redirect, useParams } from 'next/navigation'
 import { useMemo } from 'react'
@@ -88,27 +90,27 @@ export default function Room() {
             selectedProfileIds={selectedProfileIds}
           />
         </div>
-        <div>
-          <Button onClick={() => db.auth.signOut()} type="button">
-            Leave
-          </Button>
-        </div>
+        <Button onClick={() => db.auth.signOut()} type="button">
+          Leave
+        </Button>
       </header>
       <main className={styles.main}>
         {meeting.stage === Stage.Intro && (
           <CreatePostForm meetingId={meeting.id} profile={profile} />
         )}
-        <ul className={styles.posts}>
-          {postsToDisplay.map(post => (
-            <Post
-              key={post.id}
-              meetingId={meeting.id}
-              meetingStage={meeting.stage as Stage}
-              post={post}
-              profile={profile}
-            />
-          ))}
-        </ul>
+        <DndContext modifiers={[restrictToWindowEdges]}>
+          <ul className={styles.posts}>
+            {postsToDisplay.map(post => (
+              <Post
+                key={post.id}
+                meetingId={meeting.id}
+                meetingStage={meeting.stage as Stage}
+                post={post}
+                profile={profile}
+              />
+            ))}
+          </ul>
+        </DndContext>
       </main>
     </div>
   )
