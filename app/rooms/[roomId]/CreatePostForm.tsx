@@ -69,11 +69,18 @@ export function CreatePostForm(props: {
   // Create or update a post.
   async function createOrUpdatePost(data: CreatePostFormData) {
     const postId = data.id ?? id()
+    const groupId = id()
     await db.transact([
       db.tx.posts[postId].update({
         content: data.content,
         sentiment: data.sentiment ?? undefined,
       }),
+      ...(data.id
+        ? []
+        : [
+            db.tx.groups[groupId].update({ name: 'Group' }),
+            db.tx.posts[postId].link({ group: groupId }),
+          ]),
       ...(isAuthor
         ? []
         : [
