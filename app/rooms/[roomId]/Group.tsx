@@ -22,6 +22,7 @@ export interface GroupProps {
 
 export function Group(props: GroupProps) {
   const [uuid] = useState(() => crypto.randomUUID())
+
   const id = props.group.id || uuid
 
   const droppable = useDroppable({ id, data: { type: 'group' } })
@@ -44,7 +45,7 @@ export function Group(props: GroupProps) {
 
   async function updateGroupName(event: ChangeEvent<HTMLInputElement>) {
     const name = event.target.value
-    await db.transact([db.tx.groups[props.group.id].update({ name })])
+    await db.transact(db.tx.groups[props.group.id].update({ name }))
   }
 
   return (
@@ -59,9 +60,9 @@ export function Group(props: GroupProps) {
       <header className={styles.header}>
         <TextInput
           className={styles.groupName}
-          defaultValue={props.group.name}
           onChange={updateGroupName}
           readOnly={props.meeting.stage !== Stage.Group}
+          value={props.group.name}
         />
         {props.meeting.stage === Stage.Discussion && (
           <Button
@@ -73,6 +74,11 @@ export function Group(props: GroupProps) {
               ? 'Unvote'
               : 'Vote'}
           </Button>
+        )}
+        {props.meeting.stage === Stage.Feedback && (
+          <label className="button">
+            {JSON.parse(props.group.votedBy ?? '[]').length} votes
+          </label>
         )}
       </header>
       <ul>

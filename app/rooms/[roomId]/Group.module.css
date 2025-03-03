@@ -12,6 +12,10 @@
 .group ul {
   display: grid;
   gap: inherit;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(calc(24rem - 0.625rem * 2), 1fr)
+  );
   list-style: none;
   margin: 0;
   padding: 0;
@@ -21,6 +25,7 @@
   align-items: center;
   display: flex;
   gap: inherit;
+  grid-column: 1 / -1;
   height: var(--button-height-medium);
   justify-content: space-between;
 }
@@ -29,7 +34,7 @@
   width: 100%;
 }
 
-.groupName[readonly] {
+.groupName {
   background-color: transparent;
 }
 

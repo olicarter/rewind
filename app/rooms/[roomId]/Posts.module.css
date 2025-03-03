@@ -7,3 +7,33 @@
   grid-template-rows: masonry;
   grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
 }
+
+.feedbackPosts {
+  display: grid;
+  gap: inherit;
+  grid-template-columns: 1fr;
+}
+
+.comments {
+  background-color: var(--color-layer-2);
+  border-radius: 0.625rem;
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  justify-content: flex-end;
+  padding: 0.625rem;
+}
+
+.comments footer {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.commentTextArea {
+  background-color: var(--color-layer);
+  border-radius: 0.625rem;
+  padding: 0.625rem;
+  width: 100%;
+}

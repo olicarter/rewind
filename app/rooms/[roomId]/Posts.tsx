@@ -43,11 +43,7 @@ export function Posts(props: PostsProps) {
     props.selectedProfileIds,
   ])
 
-  if (
-    [Stage.Group, Stage.Discussion, Stage.Feedback].includes(
-      props.meeting.stage
-    )
-  ) {
+  if (props.meeting.stage === Stage.Group) {
     return (
       <DndContext
         modifiers={[restrictToWindowEdges]}
@@ -68,14 +64,9 @@ export function Posts(props: PostsProps) {
 
           // If the post is being dropped on the background
           if (dropType === 'posts' && dragGroupId) {
-            // Don't do anything if the group has only one post
-            if (postsInDragGroup.length === 1) return
-
             // Remove the post from the group and create a new group
             const actions = [
               db.tx.posts[dragPostId].unlink({ group: dragGroupId }),
-              db.tx.groups[newGroupId].update({ name: 'Group' }),
-              db.tx.posts[dragPostId].link({ group: newGroupId }),
             ]
 
             // If the group is now empty, delete it
@@ -110,12 +101,32 @@ export function Posts(props: PostsProps) {
           }
         }}
       >
-        <GroupPostsList
+        <GroupPosts
           meeting={props.meeting}
           posts={postsToDisplay}
           profile={props.profile}
         />
       </DndContext>
+    )
+  }
+
+  if (props.meeting.stage === Stage.Discussion) {
+    return (
+      <GroupPosts
+        meeting={props.meeting}
+        posts={postsToDisplay}
+        profile={props.profile}
+      />
+    )
+  }
+
+  if (props.meeting.stage === Stage.Feedback) {
+    return (
+      <FeedbackPosts
+        meeting={props.meeting}
+        posts={postsToDisplay}
+        profile={props.profile}
+      />
     )
   }
 
@@ -134,13 +145,13 @@ export function Posts(props: PostsProps) {
   )
 }
 
-interface GroupPostsListProps {
+interface GroupPostsProps {
   meeting: Meeting
   posts: PostWithAuthor[]
   profile: Profile
 }
 
-function GroupPostsList(props: GroupPostsListProps) {
+function GroupPosts(props: GroupPostsProps) {
   const droppable = useDroppable({
     id: 'posts',
     data: { type: 'posts' },
@@ -165,7 +176,9 @@ function GroupPostsList(props: GroupPostsListProps) {
     >
       {Object.entries(groupedPostsByGroupId).map(([groupId, posts]) => {
         const group = posts.at(0)?.group
+
         if (!group) return null
+
         return (
           <Group
             group={group}
@@ -185,6 +198,45 @@ function GroupPostsList(props: GroupPostsListProps) {
           profile={props.profile}
         />
       ))}
+    </ul>
+  )
+}
+
+interface FeedbackPostsProps {
+  meeting: Meeting
+  posts: PostWithAuthor[]
+  profile: Profile
+}
+
+function FeedbackPosts(props: FeedbackPostsProps) {
+  const postsSortedByGroupWithMostVotes = props.posts.sort((a, b) => {
+    const aVotes = JSON.parse(a.group?.votedBy ?? '[]').length
+    const bVotes = JSON.parse(b.group?.votedBy ?? '[]').length
+    return bVotes - aVotes
+  })
+
+  const postsByGroupId = groupBy(
+    postsSortedByGroupWithMostVotes,
+    post => post.group?.id
+  )
+
+  return (
+    <ul className={styles.feedbackPosts}>
+      {Object.entries(postsByGroupId).map(([groupId, posts]) => {
+        const group = posts.at(0)?.group
+
+        if (!group) return null
+
+        return (
+          <Group
+            group={group}
+            key={groupId}
+            meeting={props.meeting}
+            posts={posts}
+            profile={props.profile}
+          />
+        )
+      })}
     </ul>
   )
 }

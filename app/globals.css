@@ -39,12 +39,14 @@ body {
   border: none;
   color: var(--color-foreground);
   display: flex;
+  flex-shrink: 0;
   font-family: var(--font-geist-mono);
   font-size: 0.875rem;
   font-weight: 600;
   gap: 0.5rem;
-  height: var(--button-height-small);
+  height: var(--button-height-medium);
   justify-content: center;
+  padding: 0 0.625rem;
   text-decoration: none;
   user-select: none;
   width: fit-content;
