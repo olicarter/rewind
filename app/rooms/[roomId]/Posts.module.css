@@ -11,7 +11,40 @@
 .feedbackPosts {
   display: grid;
   gap: inherit;
-  grid-template-columns: 1fr;
+  grid-template-columns: max-content 1fr;
+}
+
+.feedbackPosts > aside {
+  display: grid;
+  gap: inherit;
+  grid-auto-rows: max-content;
+}
+
+.feedbackPosts > aside > * {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.feedbackPosts > aside label {
+  justify-content: space-between;
+}
+
+.feedbackPosts > aside label:has(input:not([readonly]):checked) {
+  background-color: var(--color-accent);
+  color: var(--color-background);
+  outline: none !important;
+}
+
+.feedbackPosts > aside .voteCount {
+  opacity: 0.5;
+}
+
+.feedbackPosts > ul {
+  display: grid;
+  gap: inherit;
+  grid-auto-rows: max-content;
+  grid-template-rows: masonry;
+  grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
 }
 
 .comments {

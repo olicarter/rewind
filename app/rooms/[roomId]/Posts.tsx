@@ -1,10 +1,11 @@
 import { DndContext, useDroppable } from '@dnd-kit/core'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { id } from '@instantdb/react'
-import { groupBy } from 'lodash'
+import { groupBy, uniqBy } from 'lodash'
 import { registerMasonry } from 'masonry-pf'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { db, Meeting, PostWithAuthor, Profile, Stage } from '@/app/db'
+import { RadioButton } from '@/components/RadioButton'
 import { Group } from './Group'
 import { Post } from './Post'
 import styles from './Posts.module.css'
@@ -93,7 +94,11 @@ export function Posts(props: PostsProps) {
             const actions = [db.tx.posts[dragPostId].link({ group: dropId })]
 
             // If the old group is empty, delete it
-            if (postsInDragGroup.length === 1 && dragGroupId !== dropId) {
+            if (
+              dragGroupId &&
+              postsInDragGroup.length === 1 &&
+              dragGroupId !== dropId
+            ) {
               actions.push(db.tx.groups[dragGroupId].delete())
             }
 
@@ -215,28 +220,52 @@ function FeedbackPosts(props: FeedbackPostsProps) {
     return bVotes - aVotes
   })
 
-  const postsByGroupId = groupBy(
-    postsSortedByGroupWithMostVotes,
-    post => post.group?.id
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(
+    postsSortedByGroupWithMostVotes.at(0)?.group?.id ?? null
+  )
+
+  const uniqueGroups = uniqBy(
+    props.posts.flatMap(post => post.group ?? []),
+    'id'
   )
 
   return (
-    <ul className={styles.feedbackPosts}>
-      {Object.entries(postsByGroupId).map(([groupId, posts]) => {
-        const group = posts.at(0)?.group
+    <div className={styles.feedbackPosts}>
+      <aside>
+        {uniqueGroups.map(group => (
+          <RadioButton
+            checked={selectedGroupId === group.id}
+            key={group.id}
+            onChange={() => setSelectedGroupId(group.id)}
+            size="large"
+          >
+            {group.name}
+            <span className={styles.voteCount}>
+              {JSON.parse(group.votedBy ?? '[]').length} votes
+            </span>
+          </RadioButton>
+        ))}
+      </aside>
+      <ul ref={registerMasonry}>
+        {selectedGroupId &&
+          postsSortedByGroupWithMostVotes
+            .filter(post => post.group?.id === selectedGroupId)
+            .map(post => {
+              const group = post.group
 
-        if (!group) return null
+              if (!group) return null
 
-        return (
-          <Group
-            group={group}
-            key={groupId}
-            meeting={props.meeting}
-            posts={posts}
-            profile={props.profile}
-          />
-        )
-      })}
-    </ul>
+              return (
+                <Post
+                  key={post.id}
+                  meetingId={props.meeting.id}
+                  meetingStage={props.meeting.stage}
+                  post={post}
+                  profile={props.profile}
+                />
+              )
+            })}
+      </ul>
+    </div>
   )
 }
