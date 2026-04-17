@@ -1,17 +1,38 @@
 .posts {
-  align-items: start;
-  display: grid;
   flex-grow: 1;
-  gap: inherit;
-  grid-auto-rows: max-content;
-  grid-template-rows: masonry;
-  grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
 }
 
 .feedbackPosts {
   display: grid;
   gap: inherit;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 816px) {
+  .feedbackPosts {
+    grid-template-columns: repeat(2, minmax(24rem, 1fr));
+  }
+  .feedbackPostsMain {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (min-width: 1216px) {
+  .feedbackPosts {
+    grid-template-columns: repeat(3, minmax(24rem, 1fr));
+  }
+}
+
+@media (min-width: 1616px) {
+  .feedbackPosts {
+    grid-template-columns: repeat(4, minmax(24rem, 1fr));
+  }
+}
+
+@media (min-width: 2016px) {
+  .feedbackPosts {
+    grid-template-columns: repeat(5, minmax(24rem, 1fr));
+  }
 }
 
 .feedbackPosts > aside {
@@ -20,31 +41,24 @@
   grid-auto-rows: max-content;
 }
 
-.feedbackPosts > aside > * {
-  justify-content: flex-start;
+
+.feedbackPosts > aside :global(.groupCard) label {
+  height: auto;
+  justify-content: space-between;
+  line-height: 1.5;
+  padding: calc((2.5rem - 0.875rem * 1.5) / 2) 0.875rem;
   width: 100%;
 }
 
-.feedbackPosts > aside label {
-  justify-content: space-between;
+.feedbackPosts > aside :global(.groupCard) .voteCount {
+  opacity: 0.5;
+  white-space: nowrap;
 }
 
-.feedbackPosts > aside label:has(input:not([readonly]):checked) {
+.feedbackPosts > aside :global(.groupCard) label:has(input:not([readonly]):checked) {
   background-color: var(--color-accent);
   color: var(--color-background);
   outline: none !important;
-}
-
-.feedbackPosts > aside .voteCount {
-  opacity: 0.5;
-}
-
-.feedbackPosts > ul {
-  display: grid;
-  gap: inherit;
-  grid-auto-rows: max-content;
-  grid-template-rows: masonry;
-  grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
 }
 
 .comments {

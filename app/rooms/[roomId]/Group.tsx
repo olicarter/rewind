@@ -50,7 +50,7 @@ export function Group(props: GroupProps) {
 
   return (
     <li
-      className={styles.group}
+      className={`groupCard ${styles.group}`}
       id={id}
       ref={droppable.setNodeRef}
       style={{
@@ -64,10 +64,11 @@ export function Group(props: GroupProps) {
           readOnly={props.meeting.stage !== Stage.Group}
           value={props.group.name}
         />
-        {props.meeting.stage === Stage.Discussion && (
+        {(props.meeting.stage === Stage.Discussion || props.meeting.stage === Stage.Group) && (
           <Button
             className={styles.voteButton}
-            onClick={toggleVote}
+            onClick={props.meeting.stage === Stage.Discussion ? toggleVote : undefined}
+            style={props.meeting.stage === Stage.Group ? { visibility: 'hidden' } : undefined}
             type="button"
           >
             {props.group.votedBy?.includes(props.profile.id)

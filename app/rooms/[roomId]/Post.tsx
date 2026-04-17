@@ -35,6 +35,18 @@ export function Post(props: {
 
   const [editing, setEditing] = useState(false)
 
+  async function toggleVote() {
+    const votedBy = new Set<string>(JSON.parse(props.post.votedBy ?? '[]'))
+    const newVotedBy = votedBy.has(props.profile.id)
+      ? Array.from(votedBy).filter(id => id !== props.profile.id)
+      : [...votedBy, props.profile.id]
+    await db.transact([
+      db.tx.posts[props.post.id].update({
+        votedBy: JSON.stringify(newVotedBy),
+      }),
+    ])
+  }
+
   if (editing) {
     return (
       <CreatePostForm
@@ -111,6 +123,14 @@ export function Post(props: {
               <DeleteButton post={props.post} />
             </div>
           )}
+        </footer>
+      )}
+      {(props.meetingStage === Stage.Discussion || props.meetingStage === Stage.Group) && !props.post.group?.id && (
+        <footer style={props.meetingStage === Stage.Group ? { visibility: 'hidden' } : undefined}>
+          <div />
+          <Button onClick={toggleVote} type="button">
+            {props.post.votedBy?.includes(props.profile.id) ? 'Unvote' : 'Vote'}
+          </Button>
         </footer>
       )}
     </div>

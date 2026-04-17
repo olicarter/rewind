@@ -22,6 +22,8 @@ const _schema = i.schema({
       content: i.string(),
       createdAt: i.date(),
       sentiment: i.string(),
+      // JSON serialized array of profile IDs
+      votedBy: i.string(),
     }),
     profiles: i.entity({
       createdAt: i.date(),

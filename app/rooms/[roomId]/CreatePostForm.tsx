@@ -7,7 +7,6 @@ import { ChangeEvent, useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PostWithAuthor, Profile, Sentiment, db } from '@/app/db'
-import { Avatar } from '@/components/Avatar'
 import { Button } from '@/components/Button'
 import { TextArea } from '@/components/TextArea'
 import { useSentimentAnalyser } from '@/hooks/useSentimentAnalyser'
@@ -111,13 +110,11 @@ export function CreatePostForm(props: {
         }}
         onSubmit={handleSubmit(createOrUpdatePost)}
       >
-        <header className={styles.header}>
-          <div>
-            <Avatar name={props.profile.name} size="medium" />
-            <h4 className={styles.heading}>{props.profile.name}</h4>
-          </div>
-          {props.post && <SentimentInputs size="small" />}
-        </header>
+        {props.post && (
+          <header className={styles.header}>
+            <SentimentInputs size="small" />
+          </header>
+        )}
 
         <TextArea
           {...register('content', {

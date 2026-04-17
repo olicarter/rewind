@@ -2,7 +2,7 @@
   background-color: transparent;
   border: none;
   border-radius: 0;
-  color: white;
+  color: var(--color-foreground);
   line-height: 1.5;
   min-height: calc(1.25rem * 2);
   padding: 0;
@@ -14,7 +14,7 @@
 }
 
 .textArea::placeholder {
-  color: hsla(0, 0%, 100%, 0.5);
+  color: color-mix(in oklch, var(--color-foreground) 50%, transparent);
 }
 
 .textArea[readonly] {

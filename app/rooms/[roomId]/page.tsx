@@ -1,9 +1,10 @@
 'use client'
 
 import { uniqBy } from 'lodash'
-import { redirect, useParams } from 'next/navigation'
+import { redirect, useParams, useRouter } from 'next/navigation'
 import { Meeting, PostWithAuthor, Stage, db } from '@/app/db'
 import { Button } from '@/components/Button/Button'
+import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
 import { SignInPage } from '@/components/SignInPage/SignInPage'
 import { isEveryCharUppercase, isDefined } from '@/utils'
 import { CreatePostForm } from './CreatePostForm'
@@ -17,6 +18,7 @@ import {
 import { Stages } from './Stages'
 export default function Room() {
   const auth = db.useAuth()
+  const router = useRouter()
   const { roomId } = useParams<{ roomId: string }>()
 
   // Redirect to the uppercase version of the room ID
@@ -69,13 +71,19 @@ export default function Room() {
             selectedProfileIds={selectedProfileIds}
           />
         </div>
-        <Button onClick={() => db.auth.signOut()} type="button">
-          Leave
-        </Button>
+        <div className={styles.actions}>
+          <ThemeToggle />
+          <Button onClick={() => router.push('/')} type="button">
+            Leave
+          </Button>
+        </div>
       </header>
       <main className={styles.main}>
         {meeting.stage === Stage.Intro && (
-          <CreatePostForm meetingId={meeting.id} profile={profile} />
+          <div className="groupCard">
+            <h2 className="groupCardTitle">Share</h2>
+            <CreatePostForm meetingId={meeting.id} profile={profile} />
+          </div>
         )}
         <Posts
           meeting={meeting}

@@ -17,12 +17,12 @@
     "@tensorflow/tfjs": "^4.22.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.476.0",
-    "masonry-pf": "^1.0.0",
     "next": "15.1.6",
     "radix-ui": "^1.1.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
+    "react-plock": "^3.6.1",
     "worker-loader": "^3.0.8",
     "zod": "^3.24.2"
   },
@@ -43,5 +43,6 @@
     "semi": false,
     "singleQuote": true,
     "arrowParens": "avoid"
-  }
+  },
+  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
 }

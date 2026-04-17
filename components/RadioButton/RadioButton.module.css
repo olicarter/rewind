@@ -22,5 +22,5 @@
 
 .label:has(.input:not([readonly]):checked),
 .label:has(.input:not([readonly]):focus-visible) {
-  outline: 2px solid white;
+  outline: 2px solid var(--color-foreground);
 }
