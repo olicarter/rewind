@@ -2,8 +2,8 @@ import { DndContext, useDroppable } from '@dnd-kit/core'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { id } from '@instantdb/react'
 import { groupBy, uniqBy } from 'lodash'
-import { Masonry } from 'react-plock'
 import { useMemo, useRef, useState } from 'react'
+import { Masonry } from 'react-plock'
 import { db, Meeting, PostWithAuthor, Profile, Stage } from '@/app/db'
 import { RadioButton } from '@/components/RadioButton'
 import { Group } from './Group'
@@ -163,6 +163,7 @@ export function Posts(props: PostsProps) {
   return (
     <Masonry
       className={styles.posts}
+      config={MASONRY_CONFIG}
       items={postsToDisplay.map(p => p.id)}
       render={postId => {
         const post = introPostMap.get(postId)
@@ -176,7 +177,6 @@ export function Posts(props: PostsProps) {
           />
         )
       }}
-      config={MASONRY_CONFIG}
     />
   )
 }
@@ -253,6 +253,7 @@ function GroupPosts(props: GroupPostsProps) {
     // Wrapper carries the DnD droppable ref for "drop on background" detection.
     <div className={styles.posts} ref={droppable.setNodeRef}>
       <Masonry
+        config={MASONRY_CONFIG}
         items={items}
         render={item => {
           if (item.startsWith('group:')) {
@@ -281,7 +282,6 @@ function GroupPosts(props: GroupPostsProps) {
             />
           )
         }}
-        config={MASONRY_CONFIG}
       />
     </div>
   )

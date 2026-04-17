@@ -48,13 +48,13 @@ export function SignInPage() {
 <Form.Field>
             <Form.Label htmlFor="email">Email</Form.Label>
             <TextInput
+              autoComplete="email"
               id="email"
-              type="email"
-              value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              autoComplete="email"
               required
+              type="email"
+              value={email}
             />
           </Form.Field>
           {error && <p className={styles.error}>{error}</p>}
@@ -70,13 +70,13 @@ export function SignInPage() {
           <Form.Field>
             <Form.Label htmlFor="code">Magic code</Form.Label>
             <TextInput
-              id="code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="——————"
               autoComplete="one-time-code"
               className={styles.codeInput}
+              id="code"
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="——————"
               required
+              value={code}
             />
           </Form.Field>
           {error && <p className={styles.error}>{error}</p>}
@@ -84,9 +84,9 @@ export function SignInPage() {
             {loading ? 'Verifying…' : 'Sign in'}
           </Button>
           <button
-            type="button"
             className={styles.back}
             onClick={() => { setCodeSent(false); setCode(''); setError(null) }}
+            type="button"
           >
             Use a different email
           </button>
