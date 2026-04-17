@@ -247,7 +247,7 @@ function GroupPosts(props: GroupPostsProps) {
     }
 
     return stableOrderRef.current
-  }, [groupedPostsByGroupId, ungroupedPosts, props.sortByVotes])
+  }, [groupedPostsByGroupId, ungroupedPosts])
 
   return (
     // Wrapper carries the DnD droppable ref for "drop on background" detection.
